@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.env
+keypairs/*.json
+!keypairs/.gitkeep
