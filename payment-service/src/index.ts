@@ -134,12 +134,14 @@ function createApp(
       }
 
       const build = await buildTransfer(config, {
-        owner: senderPublicKey,
-        destination: destination.toBase58(),
+        from: senderPublicKey,
+        to: destination.toBase58(),
         amount: body.amount,
         cluster,
         mint,
-        privacy,
+        visibility: privacy,
+        fromBalance: "base",
+        toBalance: "base",
         validator,
         memo
       });

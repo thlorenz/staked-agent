@@ -28,12 +28,14 @@ export type ErrorResponse = {
 };
 
 export type BuildTransferParams = {
-  owner: string;
-  destination: string;
+  from: string;
+  to: string;
   amount: number;
   cluster: string;
   mint: string;
-  privacy: PrivacyMode;
+  visibility: PrivacyMode;
+  fromBalance: "base" | "ephemeral";
+  toBalance: "base" | "ephemeral";
   validator?: string;
   memo?: string;
 };
