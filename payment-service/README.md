@@ -61,6 +61,7 @@ Remote-signing routes will be added in later steps:
 - `POST /api/remote/tee/auth`
 
 `POST /api/remote/build-payment` returns an unsigned transaction for the connected wallet to sign in the browser flow.
+`POST /api/remote/tee/challenge` and `POST /api/remote/tee/auth` exist so the browser flow can keep using MagicBlock private payments.
 
 For `POST /api/pay`, the sample defaults:
 

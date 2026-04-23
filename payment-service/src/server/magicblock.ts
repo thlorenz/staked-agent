@@ -60,6 +60,23 @@ export async function getTeeAuthToken(
   config: AppConfig,
   signer: Keypair
 ): Promise<TeeAuthToken> {
+  const publicKey = signer.publicKey.toBase58();
+  const challenge = await requestTeeChallenge(config, publicKey);
+  const signature = nacl.sign.detached(
+    parseChallengeBytes(challenge),
+    signer.secretKey
+  );
+  return authenticateTeeChallenge(config, {
+    publicKey,
+    challenge,
+    signature: bs58.encode(signature)
+  });
+}
+
+export async function requestTeeChallenge(
+  config: AppConfig,
+  publicKey: string
+): Promise<string> {
   const challengeResponse = await fetch(
     joinUrl(config.magicblockTeeUrl, config.magicblockTeeChallengePath),
     {
@@ -67,9 +84,7 @@ export async function getTeeAuthToken(
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        publicKey: signer.publicKey.toBase58()
-      })
+      body: JSON.stringify({ publicKey })
     }
   );
 
@@ -86,11 +101,17 @@ export async function getTeeAuthToken(
     throw new Error("TEE challenge response did not include a challenge");
   }
 
-  const signature = nacl.sign.detached(
-    parseChallengeBytes(challengeBody.challenge),
-    signer.secretKey
-  );
+  return challengeBody.challenge;
+}
 
+export async function authenticateTeeChallenge(
+  config: AppConfig,
+  payload: {
+    publicKey: string;
+    challenge: string;
+    signature: string;
+  }
+): Promise<TeeAuthToken> {
   const authResponse = await fetch(
     joinUrl(config.magicblockTeeUrl, config.magicblockTeeAuthPath),
     {
@@ -98,11 +119,7 @@ export async function getTeeAuthToken(
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        publicKey: signer.publicKey.toBase58(),
-        challenge: challengeBody.challenge,
-        signature: bs58.encode(signature)
-      })
+      body: JSON.stringify(payload)
     }
   );
 

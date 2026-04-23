@@ -63,3 +63,13 @@ export type RemoteBuildResponse = {
   privacy: PrivacyMode;
   build: BuiltTransferResponse;
 };
+
+export type TeeChallengeResponse = {
+  ok: true;
+  challenge: string;
+};
+
+export type RemoteTeeAuthResponse = {
+  ok: true;
+  token: string;
+};
