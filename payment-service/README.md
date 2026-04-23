@@ -1,6 +1,6 @@
 # payment-service
 
-`payment-service` is a small custodial demo that shows how a Node.js service can build and sign MagicBlock-backed payment transactions on Solana devnet.
+`payment-service` is being migrated from an Express-only sample to a single Next.js app that will host both the existing server-side payment route and the new browser wallet-signing flow.
 
 ## Commands
 
@@ -11,6 +11,7 @@
 - `make run`
 - `make health`
 - `make balance`
+- `make browser-pay`
 
 ## Configuration
 
@@ -37,31 +38,19 @@ The service expects a Solana CLI-style keypair file:
 [12,34,56,...]
 ```
 
-## Endpoints
+## Current endpoints
 
-- `GET /health`
-- `GET /balance`
-- `POST /pay`
+- `GET /api/health`
 
-For `POST /pay`, the sample defaults:
+The Next.js migration shell is in place first. The following routes will be restored in later steps:
 
-- `mint` to `USDC_MINT`
-- `cluster` to `CLUSTER`
-- `privacy` to `private`
+- `GET /api/balance`
+- `POST /api/pay`
+- `POST /api/remote/build-payment`
+- `POST /api/remote/tee/challenge`
+- `POST /api/remote/tee/auth`
 
-The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The service is custodial and signs with the local JSON keypair at `./keypairs/01.json` by default.
-
-Example request:
-
-```sh
-curl -X POST http://localhost:3000/pay \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "to": "DESTINATION_PUBKEY",
-    "amount": 1000,
-    "privacy": "private"
-  }'
-```
+`make run` remains the primary local entrypoint.
 
 ## Quickstart
 
@@ -70,22 +59,19 @@ cp .env.example .env
 mkdir -p keypairs
 # place a real Solana CLI-style keypair at ./keypairs/01.json
 yarn install
-yarn build
 make run
-curl http://localhost:3000/health
-curl http://localhost:3000/balance
-curl -X POST http://localhost:3000/pay \
-  -H 'Content-Type: application/json' \
-  -d '{"to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
+curl http://localhost:3000/api/health
+make browser-pay
 ```
 
-`make run` is the primary local entrypoint. It uses devnet-oriented defaults, while still letting already-exported environment variables override those values.
+`make run` uses devnet-oriented defaults, while still letting already-exported environment variables override those values. `NEXT_PUBLIC_SOLANA_RPC_URL` and `NEXT_PUBLIC_CLUSTER` are set from the same server defaults so the future browser wallet flow can use the same environment.
 
-`yarn start` and `yarn dev` both run the service directly from `src/index.ts` via `esr`.
+`yarn dev` runs the Next.js app in development mode, and `yarn start` runs the production build.
 
 ## Known limitations
 
 - The sample is custodial.
+- The migration to a single Next.js app is in progress.
 - The default target environment is devnet.
 - The TEE auth endpoint paths are placeholders pending confirmation.
 - TEE attestation is intentionally not implemented.

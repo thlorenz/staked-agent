@@ -10,7 +10,7 @@ USDC_MINT ?= 6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW
 SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
 VERIFY_TEE ?= false
 
-.PHONY: run build health balance
+.PHONY: run build health balance browser-pay
 
 run:
 	PORT=$(PORT) \
@@ -25,13 +25,18 @@ run:
 	VERIFY_TEE=$(VERIFY_TEE) \
 	USDC_MINT=$(USDC_MINT) \
 	VALIDATOR="$(VALIDATOR)" \
+	NEXT_PUBLIC_SOLANA_RPC_URL=$(SOLANA_RPC_URL) \
+	NEXT_PUBLIC_CLUSTER=$(CLUSTER) \
 	yarn dev
 
 build:
 	yarn build
 
 health:
-	curl -sS http://localhost:3000/health
+	curl -sS http://localhost:3000/api/health
 
 balance:
-	curl -sS http://localhost:3000/balance
+	curl -sS http://localhost:3000/api/balance
+
+browser-pay:
+	@printf '%s\n' 'http://localhost:3000'

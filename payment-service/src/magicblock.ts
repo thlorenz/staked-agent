@@ -2,12 +2,12 @@ import bs58 from "bs58";
 import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
 
-import { AppConfig } from "./config";
+import { AppConfig } from "./server/config";
 import {
   BuildTransferParams,
   BuiltTransferResponse,
   TeeAuthToken
-} from "./types";
+} from "./server/types";
 
 type ChallengeResponse = {
   challenge?: string;
