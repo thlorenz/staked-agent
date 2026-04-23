@@ -14,3 +14,15 @@ export interface HealthResponse {
   ok: true;
   service: "payment-service";
 }
+
+export interface BalanceResponse {
+  ok: true;
+  wallet: string;
+  solBalanceLamports: number;
+}
+
+export interface ErrorResponse {
+  ok: false;
+  error: string;
+  details?: string;
+}

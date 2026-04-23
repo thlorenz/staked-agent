@@ -28,3 +28,14 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 The default local keypair path is `./keypairs/01.json`.
 
 Keep real keypairs out of git.
+
+The service expects a Solana CLI-style keypair file:
+
+```json
+[12,34,56,...]
+```
+
+## Endpoints
+
+- `GET /health`
+- `GET /balance`
