@@ -60,6 +60,8 @@ Remote-signing routes will be added in later steps:
 - `POST /api/remote/tee/challenge`
 - `POST /api/remote/tee/auth`
 
+`POST /api/remote/build-payment` returns an unsigned transaction for the connected wallet to sign in the browser flow.
+
 For `POST /api/pay`, the sample defaults:
 
 - `mint` to `USDC_MINT`

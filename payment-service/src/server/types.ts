@@ -54,3 +54,12 @@ export type PayResponse = {
   privacy: PrivacyMode;
   build: BuiltTransferResponse;
 };
+
+export type RemoteBuildResponse = {
+  ok: true;
+  sender: string;
+  destination: string;
+  amount: number;
+  privacy: PrivacyMode;
+  build: BuiltTransferResponse;
+};
