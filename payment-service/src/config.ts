@@ -64,6 +64,8 @@ export function loadConfig(): AppConfig {
       "https://devnet-tee.magicblock.app",
     magicblockTeeWsUrl:
       process.env.MAGICBLOCK_TEE_WS_URL?.trim() || "wss://tee.magicblock.app",
+    // These path defaults are placeholders and may need to be replaced with
+    // the actual MagicBlock integration endpoints.
     magicblockTeeChallengePath:
       process.env.MAGICBLOCK_TEE_CHALLENGE_PATH?.trim() || "/challenge",
     magicblockTeeAuthPath:

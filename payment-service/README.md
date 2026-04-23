@@ -25,6 +25,8 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 - `MAGICBLOCK_TEE_CHALLENGE_PATH`
 - `MAGICBLOCK_TEE_AUTH_PATH`
 
+The sample is configured for devnet by default. The TEE auth endpoint paths are env-configurable placeholders until they are validated against a live MagicBlock integration. Public transfers do not require that auth path in this sample.
+
 The default local keypair path is `./keypairs/01.json`.
 
 Keep real keypairs out of git.

@@ -26,3 +26,29 @@ export interface ErrorResponse {
   error: string;
   details?: string;
 }
+
+export interface BuildTransferParams {
+  owner: string;
+  destination: string;
+  amount: number;
+  cluster: string;
+  mint: string;
+  privacy: PrivacyMode;
+  validator?: string;
+  memo?: string;
+}
+
+export interface BuiltTransferResponse {
+  kind: string;
+  transactionBase64: string;
+  requiredSigners?: string[];
+  sendTo?: string;
+  recentBlockhash?: string;
+  lastValidBlockHeight?: number;
+  instructionCount?: number;
+  validator?: string;
+}
+
+export interface TeeAuthToken {
+  token: string;
+}
