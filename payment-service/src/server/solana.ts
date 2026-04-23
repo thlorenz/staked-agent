@@ -19,7 +19,7 @@ export function loadKeypairFromFile(filePath: string): Keypair {
     throw new Error(
       `Unable to read sender keypair file at ${resolvedPath}: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }`
     );
   }
 
@@ -30,7 +30,7 @@ export function loadKeypairFromFile(filePath: string): Keypair {
     throw new Error(
       `Sender keypair file is not valid JSON: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }`
     );
   }
 
@@ -40,12 +40,11 @@ export function loadKeypairFromFile(filePath: string): Keypair {
 
   if (
     parsed.some(
-      (value) =>
-        !Number.isInteger(value) || value < 0 || value > 255,
+      (value) => !Number.isInteger(value) || value < 0 || value > 255
     )
   ) {
     throw new Error(
-      "Sender keypair JSON must contain only integer byte values between 0 and 255",
+      "Sender keypair JSON must contain only integer byte values between 0 and 255"
     );
   }
 
@@ -55,7 +54,7 @@ export function loadKeypairFromFile(filePath: string): Keypair {
     throw new Error(
       `Unable to construct Keypair from sender keypair file: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }`
     );
   }
 }
@@ -73,7 +72,7 @@ export function parsePublicKey(value: string, fieldName: string): PublicKey {
 }
 
 export function deserializeTransaction(
-  transactionBase64: string,
+  transactionBase64: string
 ): Transaction | VersionedTransaction {
   const buffer = Buffer.from(transactionBase64, "base64");
 
@@ -91,7 +90,7 @@ export function deserializeTransaction(
 export async function signAndSendBuiltTransaction(
   connection: Connection,
   transaction: Transaction | VersionedTransaction,
-  signer: Keypair,
+  signer: Keypair
 ): Promise<string> {
   if (transaction instanceof VersionedTransaction) {
     transaction.sign([signer]);
@@ -106,7 +105,7 @@ export async function signAndSendBuiltTransaction(
 
 export function assertRequiredSigner(
   requiredSigners: string[] | undefined,
-  signerPublicKey: string,
+  signerPublicKey: string
 ): void {
   if (!requiredSigners || requiredSigners.length === 0) {
     return;

@@ -38,19 +38,41 @@ The service expects a Solana CLI-style keypair file:
 [12,34,56,...]
 ```
 
-## Current endpoints
+## Endpoints
 
 - `GET /api/health`
-
-The Next.js migration shell is in place first. The following routes will be restored in later steps:
-
 - `GET /api/balance`
 - `POST /api/pay`
+
+The preserved built-in-keypair test path is:
+
+- `POST /api/pay`
+
+Remote-signing routes will be added in later steps:
+
 - `POST /api/remote/build-payment`
 - `POST /api/remote/tee/challenge`
 - `POST /api/remote/tee/auth`
 
-`make run` remains the primary local entrypoint.
+For `POST /api/pay`, the sample defaults:
+
+- `mint` to `USDC_MINT`
+- `cluster` to `CLUSTER`
+- `privacy` to `private`
+
+The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The server signs with the local JSON keypair at `./keypairs/01.json` for this preserved custodial test route.
+
+Example request:
+
+```sh
+curl -X POST http://localhost:3000/api/pay \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "to": "DESTINATION_PUBKEY",
+    "amount": 1000,
+    "privacy": "private"
+  }'
+```
 
 ## Quickstart
 
@@ -61,6 +83,10 @@ mkdir -p keypairs
 yarn install
 make run
 curl http://localhost:3000/api/health
+curl http://localhost:3000/api/balance
+curl -X POST http://localhost:3000/api/pay \
+  -H 'Content-Type: application/json' \
+  -d '{"to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
 make browser-pay
 ```
 

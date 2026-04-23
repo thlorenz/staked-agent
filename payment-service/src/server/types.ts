@@ -38,3 +38,19 @@ export type BuiltTransferResponse = {
 export type TeeAuthToken = {
   token: string;
 };
+
+export type BalanceResponse = {
+  ok: true;
+  wallet: string;
+  solBalanceLamports: number;
+};
+
+export type PayResponse = {
+  ok: true;
+  signature: string;
+  sender: string;
+  destination: string;
+  amount: number;
+  privacy: PrivacyMode;
+  build: BuiltTransferResponse;
+};
