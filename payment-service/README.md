@@ -62,3 +62,29 @@ curl -X POST http://localhost:3000/pay \
     "privacy": "private"
   }'
 ```
+
+## Quickstart
+
+```sh
+cp .env.example .env
+mkdir -p keypairs
+# place a real Solana CLI-style keypair at ./keypairs/01.json
+yarn install
+yarn build
+make run
+curl http://localhost:3000/health
+curl http://localhost:3000/balance
+curl -X POST http://localhost:3000/pay \
+  -H 'Content-Type: application/json' \
+  -d '{"to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
+```
+
+`make run` is the primary local entrypoint. It uses devnet-oriented defaults, while still letting already-exported environment variables override those values.
+
+## Known limitations
+
+- The sample is custodial.
+- The default target environment is devnet.
+- The TEE auth endpoint paths are placeholders pending confirmation.
+- TEE attestation is intentionally not implemented.
+- Split payments and delayed scheduling are not implemented.
