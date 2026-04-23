@@ -73,3 +73,8 @@ export type RemoteTeeAuthResponse = {
   ok: true;
   token: string;
 };
+
+export type RemoteSubmitResponse = {
+  ok: true;
+  signature: string;
+};

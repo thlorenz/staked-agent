@@ -43,6 +43,10 @@ The service expects a Solana CLI-style keypair file:
 - `GET /api/health`
 - `GET /api/balance`
 - `POST /api/pay`
+- `POST /api/remote/build-payment`
+- `POST /api/remote/tee/challenge`
+- `POST /api/remote/tee/auth`
+- `POST /api/remote/submit`
 
 ## Browser UI
 
@@ -65,14 +69,9 @@ The preserved built-in-keypair test path is:
 
 - `POST /api/pay`
 
-Remote-signing routes will be added in later steps:
-
-- `POST /api/remote/build-payment`
-- `POST /api/remote/tee/challenge`
-- `POST /api/remote/tee/auth`
-
 `POST /api/remote/build-payment` returns an unsigned transaction for the connected wallet to sign in the browser flow.
 `POST /api/remote/tee/challenge` and `POST /api/remote/tee/auth` exist so the browser flow can keep using MagicBlock private payments.
+`POST /api/remote/submit` is an optional relay endpoint for a fully signed transaction.
 
 For `POST /api/pay`, the sample defaults:
 
@@ -113,6 +112,26 @@ make browser-pay
 `make run` uses devnet-oriented defaults, while still letting already-exported environment variables override those values. `NEXT_PUBLIC_SOLANA_RPC_URL` and `NEXT_PUBLIC_CLUSTER` are set from the same server defaults so the future browser wallet flow can use the same environment.
 
 `yarn dev` runs the Next.js app in development mode, and `yarn start` runs the production build.
+
+Additional Make targets:
+
+- `make pay` calls the preserved custodial `POST /api/pay` route
+- `make remote-build` calls the unsigned remote build route
+- `make browser-pay` prints the browser UI URL
+
+## Shared code
+
+The custodial route and the browser-signing flow share:
+
+- request validation and normalization
+- MagicBlock transfer build requests
+- private-payment helpers
+- Solana transaction decoding helpers
+
+The main difference is who signs:
+
+- `/api/pay` uses the built-in keypair on the server
+- the browser flow uses the connected wallet in Phantom
 
 ## Known limitations
 

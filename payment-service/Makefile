@@ -10,7 +10,7 @@ USDC_MINT ?= 6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW
 SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
 VERIFY_TEE ?= false
 
-.PHONY: run build health balance browser-pay
+.PHONY: run build health balance pay remote-build browser-pay
 
 run:
 	PORT=$(PORT) \
@@ -37,6 +37,16 @@ health:
 
 balance:
 	curl -sS http://localhost:3000/api/balance
+
+pay:
+	curl -sS -X POST http://localhost:3000/api/pay \
+		-H 'Content-Type: application/json' \
+		-d '{"to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
+
+remote-build:
+	curl -sS -X POST http://localhost:3000/api/remote/build-payment \
+		-H 'Content-Type: application/json' \
+		-d '{"from":"SENDER_PUBKEY","to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
 
 browser-pay:
 	@printf '%s\n' 'http://localhost:3000'
