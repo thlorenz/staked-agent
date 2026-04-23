@@ -6,6 +6,7 @@ MAGICBLOCK_TEE_WS_URL ?= wss://tee.magicblock.app
 MAGICBLOCK_TEE_CHALLENGE_PATH ?= /challenge
 MAGICBLOCK_TEE_AUTH_PATH ?= /authenticate
 CLUSTER ?= devnet
+USDC_MINT ?= 6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW
 SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
 VERIFY_TEE ?= false
 
@@ -22,7 +23,7 @@ run:
 	CLUSTER=$(CLUSTER) \
 	SENDER_KEYPAIR_PATH=$(SENDER_KEYPAIR_PATH) \
 	VERIFY_TEE=$(VERIFY_TEE) \
-	USDC_MINT="$(USDC_MINT)" \
+	USDC_MINT=$(USDC_MINT) \
 	VALIDATOR="$(VALIDATOR)" \
 	yarn dev
 
