@@ -50,6 +50,17 @@ The app now exposes a browser UI at `/`.
 
 Phantom is the primary tested wallet via the Solana wallet adapter stack. The wallet UI is connected, but the remote-signing API routes are still added in the next steps.
 
+The browser remote-signing flow is:
+
+- connect Phantom
+- request a MagicBlock private-payment challenge when `privacy` is `private`
+- let the wallet sign the challenge
+- let the server build the unsigned transaction
+- let the wallet sign the transaction
+- submit the signed transaction through Solana RPC
+
+The browser flow still uses MagicBlock private payments.
+
 The preserved built-in-keypair test path is:
 
 - `POST /api/pay`
