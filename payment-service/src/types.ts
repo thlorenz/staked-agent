@@ -52,3 +52,13 @@ export interface BuiltTransferResponse {
 export interface TeeAuthToken {
   token: string;
 }
+
+export interface PayResponse {
+  ok: true;
+  signature: string;
+  sender: string;
+  destination: string;
+  amount: number;
+  privacy: PrivacyMode;
+  build: BuiltTransferResponse;
+}

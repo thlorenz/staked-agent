@@ -103,3 +103,16 @@ export async function signAndSendBuiltTransaction(
   await connection.confirmTransaction(signature, "confirmed");
   return signature;
 }
+
+export function assertRequiredSigner(
+  requiredSigners: string[] | undefined,
+  signerPublicKey: string,
+): void {
+  if (!requiredSigners || requiredSigners.length === 0) {
+    return;
+  }
+
+  if (!requiredSigners.includes(signerPublicKey)) {
+    throw new Error("Sender is not listed in requiredSigners");
+  }
+}

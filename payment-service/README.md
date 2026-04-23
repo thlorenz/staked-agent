@@ -41,3 +41,24 @@ The service expects a Solana CLI-style keypair file:
 
 - `GET /health`
 - `GET /balance`
+- `POST /pay`
+
+For `POST /pay`, the sample defaults:
+
+- `mint` to `USDC_MINT`
+- `cluster` to `CLUSTER`
+- `privacy` to `private`
+
+The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The service is custodial and signs with the local JSON keypair at `./keypairs/01.json` by default.
+
+Example request:
+
+```sh
+curl -X POST http://localhost:3000/pay \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "to": "DESTINATION_PUBKEY",
+    "amount": 1000,
+    "privacy": "private"
+  }'
+```
