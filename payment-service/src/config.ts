@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-export interface AppConfig {
+export type AppConfig = {
   port: number;
   solanaRpcUrl: string;
   magicblockPaymentsUrl: string;
@@ -13,7 +13,7 @@ export interface AppConfig {
   validator?: string;
   senderKeypairPath: string;
   verifyTee: boolean;
-}
+};
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();

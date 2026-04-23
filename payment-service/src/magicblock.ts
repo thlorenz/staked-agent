@@ -9,13 +9,13 @@ import {
   TeeAuthToken
 } from "./types";
 
-interface ChallengeResponse {
+type ChallengeResponse = {
   challenge?: string;
-}
+};
 
-interface AuthenticateResponse {
+type AuthenticateResponse = {
   token?: string;
-}
+};
 
 function joinUrl(baseUrl: string, requestPath: string): string {
   const normalizedBase = baseUrl.replace(/\/+$/, "");

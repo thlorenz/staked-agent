@@ -81,6 +81,8 @@ curl -X POST http://localhost:3000/pay \
 
 `make run` is the primary local entrypoint. It uses devnet-oriented defaults, while still letting already-exported environment variables override those values.
 
+`yarn start` and `yarn dev` both run the service directly from `src/index.ts` via `esr`.
+
 ## Known limitations
 
 - The sample is custodial.

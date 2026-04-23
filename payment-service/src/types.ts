@@ -1,6 +1,6 @@
 export type PrivacyMode = "public" | "private";
 
-export interface PayRequestBody {
+export type PayRequestBody = {
   to: string;
   amount: number;
   mint?: string;
@@ -8,26 +8,26 @@ export interface PayRequestBody {
   privacy?: PrivacyMode;
   validator?: string;
   memo?: string;
-}
+};
 
-export interface HealthResponse {
+export type HealthResponse = {
   ok: true;
   service: "payment-service";
-}
+};
 
-export interface BalanceResponse {
+export type BalanceResponse = {
   ok: true;
   wallet: string;
   solBalanceLamports: number;
-}
+};
 
-export interface ErrorResponse {
+export type ErrorResponse = {
   ok: false;
   error: string;
   details?: string;
-}
+};
 
-export interface BuildTransferParams {
+export type BuildTransferParams = {
   owner: string;
   destination: string;
   amount: number;
@@ -36,9 +36,9 @@ export interface BuildTransferParams {
   privacy: PrivacyMode;
   validator?: string;
   memo?: string;
-}
+};
 
-export interface BuiltTransferResponse {
+export type BuiltTransferResponse = {
   kind: string;
   transactionBase64: string;
   requiredSigners?: string[];
@@ -47,13 +47,13 @@ export interface BuiltTransferResponse {
   lastValidBlockHeight?: number;
   instructionCount?: number;
   validator?: string;
-}
+};
 
-export interface TeeAuthToken {
+export type TeeAuthToken = {
   token: string;
-}
+};
 
-export interface PayResponse {
+export type PayResponse = {
   ok: true;
   signature: string;
   sender: string;
@@ -61,4 +61,4 @@ export interface PayResponse {
   amount: number;
   privacy: PrivacyMode;
   build: BuiltTransferResponse;
-}
+};
