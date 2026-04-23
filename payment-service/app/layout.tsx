@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
+import "./globals.css";
+
+import { WalletAppProvider } from "@/src/components/providers/wallet-provider";
+
 export default function RootLayout({
   children
 }: Readonly<{
@@ -7,7 +11,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <WalletAppProvider>{children}</WalletAppProvider>
+      </body>
     </html>
   );
 }

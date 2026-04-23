@@ -44,6 +44,12 @@ The service expects a Solana CLI-style keypair file:
 - `GET /api/balance`
 - `POST /api/pay`
 
+## Browser UI
+
+The app now exposes a browser UI at `/`.
+
+Phantom is the primary tested wallet via the Solana wallet adapter stack. The wallet UI is connected, but the remote-signing API routes are still added in the next steps.
+
 The preserved built-in-keypair test path is:
 
 - `POST /api/pay`
