@@ -14,6 +14,7 @@ import {
   fetchRemoteTeeChallenge,
   submitSignedTransaction,
 } from "@/src/lib/remote-payment-client";
+import { getClientConfig } from "@/src/lib/client-config";
 import type { PrivacyMode } from "@/src/server/types";
 
 type PaymentFormProps = { agentDestination: string };
@@ -26,6 +27,14 @@ function parseChallengeBytes(challenge: string): Uint8Array {
   }
 }
 
+function getExplorerUrl(signature: string, cluster: string): string {
+  const url = new URL(`https://explorer.solana.com/tx/${signature}`);
+  if (cluster !== "mainnet-beta") {
+    url.searchParams.set("cluster", cluster);
+  }
+  return url.toString();
+}
+
 export function PaymentForm({ agentDestination }: PaymentFormProps) {
   const { connection } = useConnection();
   const { publicKey, signMessage, signTransaction } = useWallet();
@@ -35,6 +44,7 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
   const [buildSummary, setBuildSummary] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const privacy: PrivacyMode = "private";
+  const { cluster } = getClientConfig();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -177,7 +187,18 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
             {status ?? "Connect a wallet to begin the remote signing flow."}
           </p>
           {buildSummary ? <p>{buildSummary}</p> : null}
-          {signature ? <p>Signature: {signature}</p> : null}
+          {signature ? (
+            <p>
+              Stake transaction:{" "}
+              <a
+                href={getExplorerUrl(signature, cluster)}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {signature}
+              </a>
+            </p>
+          ) : null}
         </div>
       </section>
     </main>
