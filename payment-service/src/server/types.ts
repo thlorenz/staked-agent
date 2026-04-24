@@ -113,23 +113,16 @@ export type RecordedStakePayment = {
   status: "confirmed";
 };
 
-export type StakerSnapshotEntry = {
-  stakerPubkey: string;
+export type StakerLeaderboardEntry = {
+  displayName: string;
   totalAmount: number;
-  percentageOfTotal: number;
+  stakeCount: number;
+  firstStakeUnixSeconds: number;
 };
 
-export type StakersTimeline = {
-  firstStakeTimestamp: number | null;
-  lastStakeTimestamp: number | null;
-};
-
-export type StakersSnapshotResponse = {
+export type StakersResponse = {
   ok: true;
-  timestamp: number;
-  totalStake: number;
-  timeline: StakersTimeline;
-  stakers: StakerSnapshotEntry[];
+  stakers: StakerLeaderboardEntry[];
 };
 
 export type RemoteSubmitResponse = {

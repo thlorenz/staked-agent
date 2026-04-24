@@ -199,29 +199,6 @@ select {
   color: #46523e;
 }
 
-.snapshot-summary {
-  display: grid;
-  gap: 16px;
-}
-
-.snapshot-metrics {
-  display: grid;
-  gap: 8px;
-}
-
-.snapshot-range {
-  color: #46523e;
-}
-
-.timeline-slider {
-  width: 100%;
-}
-
-.timeline-status {
-  min-height: 1.25rem;
-  color: #46523e;
-}
-
 @media (max-width: 640px) {
   .page-shell {
     padding: 24px 14px 40px;
@@ -242,9 +219,5 @@ select {
   .stakers-table th,
   .stakers-table td {
     padding: 12px 10px;
-  }
-
-  .snapshot-summary {
-    gap: 14px;
   }
 }

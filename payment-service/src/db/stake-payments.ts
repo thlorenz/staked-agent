@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 
-import type { StakersTimeline } from "@/src/server/types";
+import type { StakerLeaderboardEntry } from "@/src/server/types";
 
 export type StakePaymentStatus = "confirmed";
 
@@ -43,20 +43,12 @@ type StakePaymentRow = {
   updated_at: string;
 };
 
-type StakerSnapshotRow = {
+type StakerLeaderboardRow = {
   staker_pubkey: string;
   total_amount: number;
+  stake_count: number;
+  first_stake_unix: number;
 };
-
-type StakeTimelineRow = {
-  first_stake_timestamp: number | null;
-  last_stake_timestamp: number | null;
-};
-
-const EFFECTIVE_STAKE_UNIX_SQL = `COALESCE(
-  block_time,
-  CAST(strftime('%s', staked_at) AS INTEGER)
-)`;
 
 function mapStakePaymentRow(row: StakePaymentRow): StakePaymentRecord {
   return {
@@ -141,46 +133,34 @@ export function insertStakePayment(
   return record;
 }
 
-export function listStakerTotalsAtTimestamp(
+export function listStakerLeaderboard(
   db: Database.Database,
-  timestamp: number,
-): Array<{ stakerPubkey: string; totalAmount: number }> {
+): StakerLeaderboardEntry[] {
   const rows = db
     .prepare(
       `
       SELECT
         staker_pubkey,
-        COALESCE(SUM(amount), 0) AS total_amount
+        COALESCE(SUM(amount), 0) AS total_amount,
+        COUNT(*) AS stake_count,
+        COALESCE(
+          MIN(block_time),
+          MIN(CAST(strftime('%s', staked_at) AS INTEGER))
+        ) AS first_stake_unix
       FROM stake_payments
-      WHERE ${EFFECTIVE_STAKE_UNIX_SQL} <= ?
       GROUP BY staker_pubkey
       ORDER BY
-        total_amount DESC,
+        stake_count DESC,
+        first_stake_unix ASC,
         staker_pubkey ASC
       `,
     )
-    .all(timestamp) as StakerSnapshotRow[];
+    .all() as StakerLeaderboardRow[];
 
-  return rows.map((row) => ({
-    stakerPubkey: row.staker_pubkey,
+  return rows.map((row, index) => ({
+    displayName: `<anonymous ${index + 1}>`,
     totalAmount: row.total_amount,
+    stakeCount: row.stake_count,
+    firstStakeUnixSeconds: row.first_stake_unix,
   }));
-}
-
-export function getStakeTimeline(db: Database.Database): StakersTimeline {
-  const row = db
-    .prepare(
-      `
-      SELECT
-        MIN(${EFFECTIVE_STAKE_UNIX_SQL}) AS first_stake_timestamp,
-        MAX(${EFFECTIVE_STAKE_UNIX_SQL}) AS last_stake_timestamp
-      FROM stake_payments
-      `,
-    )
-    .get() as StakeTimelineRow | undefined;
-
-  return {
-    firstStakeTimestamp: row?.first_stake_timestamp ?? null,
-    lastStakeTimestamp: row?.last_stake_timestamp ?? null,
-  };
 }
