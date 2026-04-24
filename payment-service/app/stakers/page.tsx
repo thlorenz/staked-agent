@@ -1,23 +1,33 @@
 import { AppNav } from "@/src/components/app-nav";
-import { StakersTable } from "@/src/components/stakers-table";
 import { loadConfig } from "@/src/server/config";
-import { listStakers } from "@/src/server/stakers/list";
+import { StakersSnapshotView } from "@/src/components/stakers-snapshot-view";
+import { getStakersSnapshot } from "@/src/server/stakers/snapshot";
 
-export default function StakersPage() {
-  const stakers = listStakers(loadConfig());
+type StakersPageProps = {
+  searchParams?: Promise<{
+    timestamp?: string;
+  }>;
+};
+
+export default async function StakersPage({ searchParams }: StakersPageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const initialSnapshot = getStakersSnapshot(
+    loadConfig(),
+    resolvedSearchParams.timestamp ?? null,
+  );
 
   return (
     <main className="page-shell">
       <AppNav current="stakers" />
       <section className="panel">
-        <p className="eyebrow">Stake leaderboard</p>
+        <p className="eyebrow">Stake distribution</p>
         <h1>Stakers</h1>
         <p className="lede">
-          Anonymous stakers ranked by how many recorded public stakes they have
-          made, with the total amount shown alongside the count.
+          View how much of the recorded total stake each staker owned at a
+          specific point in time.
         </p>
       </section>
-      <StakersTable stakers={stakers} />
+      <StakersSnapshotView initialSnapshot={initialSnapshot} />
     </main>
   );
 }
