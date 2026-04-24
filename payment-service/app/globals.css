@@ -1,0 +1,139 @@
+:root {
+  color-scheme: light;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #f5f4ef;
+  color: #152216;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(221, 209, 168, 0.55), transparent 30%),
+    linear-gradient(180deg, #f5f4ef 0%, #ede8dd 100%);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.page-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  background: rgba(255, 252, 246, 0.92);
+  border: 1px solid rgba(26, 46, 28, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 18px 50px rgba(31, 39, 26, 0.08);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b765b;
+}
+
+.lede {
+  margin: 12px 0 0;
+  color: #46523e;
+}
+
+.wallet-row {
+  margin-top: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.wallet-state {
+  overflow-wrap: anywhere;
+  color: #46523e;
+}
+
+.payment-form {
+  display: grid;
+  gap: 16px;
+}
+
+.payment-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.payment-form input,
+.payment-form select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(26, 46, 28, 0.18);
+  border-radius: 12px;
+  background: #fffdfa;
+}
+
+.readonly-field {
+  background: #ece7dc;
+  border-color: rgba(26, 46, 28, 0.12);
+  color: #5c6754;
+}
+
+.readonly-field:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.payment-form button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #1f5c3a;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payment-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.result-box {
+  min-height: 64px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f3efe6;
+  border: 1px dashed rgba(26, 46, 28, 0.18);
+  color: #46523e;
+}
+
+.result-box a {
+  color: #1f5c3a;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.result-box a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    padding: 24px 14px 40px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+}

@@ -6,7 +6,7 @@ import {
   Keypair,
   PublicKey,
   Transaction,
-  VersionedTransaction
+  VersionedTransaction,
 } from "@solana/web3.js";
 
 export function loadKeypairFromFile(filePath: string): Keypair {
@@ -39,10 +39,7 @@ export function loadKeypairFromFile(filePath: string): Keypair {
   }
 
   if (
-    parsed.some(
-      (value) =>
-        !Number.isInteger(value) || value < 0 || value > 255,
-    )
+    parsed.some((value) => !Number.isInteger(value) || value < 0 || value > 255)
   ) {
     throw new Error(
       "Sender keypair JSON must contain only integer byte values between 0 and 255",
@@ -99,7 +96,9 @@ export async function signAndSendBuiltTransaction(
     transaction.partialSign(signer);
   }
 
-  const signature = await connection.sendRawTransaction(transaction.serialize());
+  const signature = await connection.sendRawTransaction(
+    transaction.serialize(),
+  );
   await connection.confirmTransaction(signature, "confirmed");
   return signature;
 }

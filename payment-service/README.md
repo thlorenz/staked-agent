@@ -1,6 +1,6 @@
 # payment-service
 
-`payment-service` is a small custodial demo that shows how a Node.js service can build and sign MagicBlock-backed payment transactions on Solana devnet.
+`payment-service` is being migrated from an Express-only sample to a single Next.js app that will host both the existing server-side payment route and the new browser wallet-signing flow.
 
 ## Commands
 
@@ -11,10 +11,11 @@
 - `make run`
 - `make health`
 - `make balance`
+- `make browser-pay`
 
 ## Configuration
 
-Copy `.env.example` to `.env` if you want file-based configuration. The sample targets Solana devnet by default.
+Copy `.env.local.example` to `.env.local` for Next.js development with `yarn dev`, or copy `.env.example` to `.env` if you want a generic file-based config. The sample targets Solana devnet by default.
 
 These environment variables control Solana RPC and MagicBlock endpoints:
 
@@ -24,10 +25,12 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 - `MAGICBLOCK_TEE_WS_URL`
 - `MAGICBLOCK_TEE_CHALLENGE_PATH`
 - `MAGICBLOCK_TEE_AUTH_PATH`
+- `AGENT_DESTINATION_PUBKEY`
 
-The sample is configured for devnet by default. The TEE auth endpoint paths are env-configurable placeholders until they are validated against a live MagicBlock integration. Public transfers do not require that auth path in this sample.
+The sample is configured for devnet by default. The TEE auth flow uses MagicBlock's current `/auth/challenge` and `/auth/login` endpoints. Public transfers do not require that auth path in this sample.
 
 The default local keypair path is `./keypairs/01.json`.
+The fixed browser stake destination defaults to `AhJJkA2WBFPKpRjL5JnHZiTkNYDRWhr13cpTRMHDzZNA` when `AGENT_DESTINATION_PUBKEY` is unset.
 
 Keep real keypairs out of git.
 
@@ -39,22 +42,54 @@ The service expects a Solana CLI-style keypair file:
 
 ## Endpoints
 
-- `GET /health`
-- `GET /balance`
-- `POST /pay`
+- `GET /api/health`
+- `GET /api/balance`
+- `POST /api/pay`
+- `POST /api/remote/build-payment`
+- `POST /api/remote/tee/challenge`
+- `POST /api/remote/tee/auth`
+- `POST /api/remote/submit`
 
-For `POST /pay`, the sample defaults:
+## Browser UI
+
+The app now exposes a browser UI at `/`.
+
+Phantom is the primary tested wallet via the Solana wallet adapter stack.
+
+The browser stake flow is:
+
+- connect Phantom
+- review the fixed configured destination shown in the form
+- choose `public` or `private` in the privacy toggle
+- enter the amount to stake
+- if `private`, request a MagicBlock private-payment challenge and let the wallet sign it
+- let the server build the unsigned transaction
+- let the wallet sign the transaction
+- submit the signed transaction through Solana RPC
+- open the Solana Explorer transaction link shown after a successful submission
+
+The current browser UI defaults to `public`, but can switch to `private` when needed. Destination is readonly in the form, memo entry is not part of this flow, and successful submissions show a `Stake transaction` Solana Explorer link.
+
+The preserved built-in-keypair test path is:
+
+- `POST /api/pay`
+
+`POST /api/remote/build-payment` returns an unsigned transaction for the connected wallet to sign in the browser flow.
+`POST /api/remote/tee/challenge` and `POST /api/remote/tee/auth` exist so the browser flow can keep using MagicBlock private payments.
+`POST /api/remote/submit` is an optional relay endpoint for a fully signed transaction.
+
+For `POST /api/pay`, the sample defaults:
 
 - `mint` to `USDC_MINT`
 - `cluster` to `CLUSTER`
-- `privacy` to `private`
+- `privacy` to `public`
 
-The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The service is custodial and signs with the local JSON keypair at `./keypairs/01.json` by default.
+The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The server signs with the local JSON keypair at `./keypairs/01.json` for this preserved custodial test route.
 
 Example request:
 
 ```sh
-curl -X POST http://localhost:3000/pay \
+curl -X POST http://localhost:3000/api/pay \
   -H 'Content-Type: application/json' \
   -d '{
     "to": "DESTINATION_PUBKEY",
@@ -66,26 +101,49 @@ curl -X POST http://localhost:3000/pay \
 ## Quickstart
 
 ```sh
-cp .env.example .env
+cp .env.local.example .env.local
 mkdir -p keypairs
 # place a real Solana CLI-style keypair at ./keypairs/01.json
 yarn install
-yarn build
-make run
-curl http://localhost:3000/health
-curl http://localhost:3000/balance
-curl -X POST http://localhost:3000/pay \
+yarn dev
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/balance
+curl -X POST http://localhost:3000/api/pay \
   -H 'Content-Type: application/json' \
   -d '{"to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
+make browser-pay
 ```
 
-`make run` is the primary local entrypoint. It uses devnet-oriented defaults, while still letting already-exported environment variables override those values.
+`.env.local.example` mirrors the `Makefile` defaults used by `make run`, including `NEXT_PUBLIC_SOLANA_RPC_URL` and `NEXT_PUBLIC_CLUSTER`, so plain `yarn dev` gets the same baseline environment.
 
-`yarn start` and `yarn dev` both run the service directly from `src/index.ts` via `esr`.
+`make run` uses devnet-oriented defaults, while still letting already-exported environment variables override those values. `NEXT_PUBLIC_SOLANA_RPC_URL` and `NEXT_PUBLIC_CLUSTER` are set from the same server defaults so the future browser wallet flow can use the same environment.
+
+`yarn dev` runs the Next.js app in development mode, and `yarn start` runs the production build.
+
+Additional Make targets:
+
+- `make pay` calls the preserved custodial `POST /api/pay` route
+- `make remote-build` calls the unsigned remote build route
+- `make browser-pay` prints the browser UI URL
+
+## Shared code
+
+The custodial route and the browser-signing flow share:
+
+- request validation and normalization
+- MagicBlock transfer build requests
+- private-payment helpers
+- Solana transaction decoding helpers
+
+The main difference is who signs:
+
+- `/api/pay` uses the built-in keypair on the server
+- the browser flow uses the connected wallet in Phantom
 
 ## Known limitations
 
 - The sample is custodial.
+- The migration to a single Next.js app is in progress.
 - The default target environment is devnet.
 - The TEE auth endpoint paths are placeholders pending confirmation.
 - TEE attestation is intentionally not implemented.

@@ -1,5 +1,8 @@
 node_modules/
 dist/
+.next/
+tsconfig.tsbuildinfo
 .env
+.env.local
 keypairs/*.json
 !keypairs/.gitkeep

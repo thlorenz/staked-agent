@@ -1,24 +1,8 @@
 export type PrivacyMode = "public" | "private";
 
-export type PayRequestBody = {
-  to: string;
-  amount: number;
-  mint?: string;
-  cluster?: string;
-  privacy?: PrivacyMode;
-  validator?: string;
-  memo?: string;
-};
-
 export type HealthResponse = {
   ok: true;
   service: "payment-service";
-};
-
-export type BalanceResponse = {
-  ok: true;
-  wallet: string;
-  solBalanceLamports: number;
 };
 
 export type ErrorResponse = {
@@ -51,8 +35,34 @@ export type BuiltTransferResponse = {
   validator?: string;
 };
 
+export type BuiltInitializeMintResponse = BuiltTransferResponse & {
+  transferQueue?: string;
+  rentPda?: string;
+};
+
+export type MintInitializationStatusResponse = {
+  mint: string;
+  validator: string;
+  transferQueue: string;
+  initialized: boolean;
+};
+
+export type PrivateBalanceResponse = {
+  address?: string;
+  mint?: string;
+  ata?: string;
+  location?: string;
+  balance: string;
+};
+
 export type TeeAuthToken = {
   token: string;
+};
+
+export type BalanceResponse = {
+  ok: true;
+  wallet: string;
+  solBalanceLamports: number;
 };
 
 export type PayResponse = {
@@ -63,4 +73,28 @@ export type PayResponse = {
   amount: number;
   privacy: PrivacyMode;
   build: BuiltTransferResponse;
+};
+
+export type RemoteBuildResponse = {
+  ok: true;
+  sender: string;
+  destination: string;
+  amount: number;
+  privacy: PrivacyMode;
+  build: BuiltTransferResponse;
+};
+
+export type TeeChallengeResponse = {
+  ok: true;
+  challenge: string;
+};
+
+export type RemoteTeeAuthResponse = {
+  ok: true;
+  token: string;
+};
+
+export type RemoteSubmitResponse = {
+  ok: true;
+  signature: string;
 };
