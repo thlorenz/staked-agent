@@ -1,10 +1,6 @@
 import { Buffer } from "buffer";
 
-import {
-  Connection,
-  Transaction,
-  VersionedTransaction
-} from "@solana/web3.js";
+import { Connection, Transaction, VersionedTransaction } from "@solana/web3.js";
 
 import type { RemoteBuildResponse } from "@/src/server/types";
 
@@ -16,21 +12,25 @@ type ErrorPayload = {
 async function parseError(response: Response): Promise<string> {
   try {
     const payload = (await response.json()) as ErrorPayload;
-    return payload.details || payload.error || `Request failed with ${response.status}`;
+    return (
+      payload.details ||
+      payload.error ||
+      `Request failed with ${response.status}`
+    );
   } catch {
     return `Request failed with ${response.status}`;
   }
 }
 
 export async function fetchRemoteTeeChallenge(
-  publicKey: string
+  publicKey: string,
 ): Promise<string> {
   const response = await fetch("/api/remote/tee/challenge", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ publicKey })
+    body: JSON.stringify({ publicKey }),
   });
 
   if (!response.ok) {
@@ -49,9 +49,9 @@ export async function completeRemoteTeeAuth(payload: {
   const response = await fetch("/api/remote/tee/auth", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -66,16 +66,15 @@ export async function buildRemotePaymentRequest(payload: {
   from: string;
   to: string;
   amount: number;
-  memo?: string;
   privacy: "public" | "private";
   teeAuthToken?: string;
 }): Promise<RemoteBuildResponse> {
   const response = await fetch("/api/remote/build-payment", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -90,7 +89,7 @@ function base64ToBytes(value: string): Uint8Array {
 }
 
 export function deserializeBuiltTransaction(
-  transactionBase64: string
+  transactionBase64: string,
 ): Transaction | VersionedTransaction {
   const bytes = base64ToBytes(transactionBase64);
 
@@ -107,9 +106,11 @@ export function deserializeBuiltTransaction(
 
 export async function submitSignedTransaction(
   connection: Connection,
-  transaction: Transaction | VersionedTransaction
+  transaction: Transaction | VersionedTransaction,
 ): Promise<string> {
-  const signature = await connection.sendRawTransaction(transaction.serialize());
+  const signature = await connection.sendRawTransaction(
+    transaction.serialize(),
+  );
   await connection.confirmTransaction(signature, "confirmed");
   return signature;
 }

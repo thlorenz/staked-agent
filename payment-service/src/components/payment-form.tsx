@@ -30,12 +30,11 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
   const { connection } = useConnection();
   const { publicKey, signMessage, signTransaction } = useWallet();
   const [amount, setAmount] = useState("1000");
-  const [memo, setMemo] = useState("");
-  const [privacy, setPrivacy] = useState<PrivacyMode>("private");
   const [status, setStatus] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [buildSummary, setBuildSummary] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const privacy: PrivacyMode = "private";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,7 +80,6 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
         from: sender,
         to: agentDestination,
         amount: parsedAmount,
-        memo: memo || undefined,
         privacy,
         teeAuthToken,
       });
@@ -114,10 +112,11 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
   return (
     <main className="page-shell">
       <section className="panel">
-        <p className="eyebrow">MagicBlock payment demo</p>
-        <h1>Wallet signing sample</h1>
+        <p className="eyebrow">MagicBlock stake flow</p>
+        <h1>Staked Agent</h1>
         <p className="lede">
-          Connect Phantom, enter a payment, and use the browser signing flow.
+          Connect Phantom and stake to the configured agent using the browser
+          signing flow.
         </p>
         <div className="wallet-row">
           <WalletMultiButton />
@@ -134,8 +133,10 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
             <input
               name="destination"
               type="text"
-              defaultValue={agentDestination}
-              placeholder="Destination pubkey"
+              value={agentDestination}
+              readOnly
+              aria-readonly="true"
+              className="readonly-field"
             />
           </label>
 
@@ -152,32 +153,19 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
           </label>
 
           <label>
-            Memo
+            Privacy
             <input
-              name="memo"
+              name="privacy"
               type="text"
-              value={memo}
-              onChange={(event) => setMemo(event.target.value)}
-              placeholder="Optional memo"
+              value="private"
+              readOnly
+              aria-readonly="true"
+              className="readonly-field"
             />
           </label>
 
-          <label>
-            Privacy
-            <select
-              name="privacy"
-              value={privacy}
-              onChange={(event) =>
-                setPrivacy(event.target.value as PrivacyMode)
-              }
-            >
-              <option value="private">private</option>
-              <option value="public">public</option>
-            </select>
-          </label>
-
           <button type="submit" disabled={!publicKey || isSubmitting}>
-            Build and sign payment
+            Stake Agent
           </button>
         </form>
       </section>
