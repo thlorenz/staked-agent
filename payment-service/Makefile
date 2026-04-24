@@ -10,6 +10,7 @@ USDC_MINT ?= 6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW
 VALIDATOR ?= MUS3hc9TCw4cGC12vHNoYcCGzJG1txjgQLZWVoeNHNd
 SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
 VERIFY_TEE ?= false
+SQLITE_DB_PATH ?= ./src/db/staked-agent.sqlite
 
 .PHONY: run build health balance pay remote-build browser-pay
 
@@ -24,6 +25,7 @@ run:
 	CLUSTER=$(CLUSTER) \
 	SENDER_KEYPAIR_PATH=$(SENDER_KEYPAIR_PATH) \
 	VERIFY_TEE=$(VERIFY_TEE) \
+	SQLITE_DB_PATH=$(SQLITE_DB_PATH) \
 	USDC_MINT=$(USDC_MINT) \
 	VALIDATOR="$(VALIDATOR)" \
 	NEXT_PUBLIC_SOLANA_RPC_URL=$(SOLANA_RPC_URL) \

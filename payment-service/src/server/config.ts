@@ -8,6 +8,7 @@ const DEFAULT_AGENT_DESTINATION =
 export type AppConfig = {
   port: number;
   solanaRpcUrl: string;
+  sqliteDbPath: string;
   magicblockPaymentsUrl: string;
   magicblockTeeUrl: string;
   magicblockTeeWsUrl: string;
@@ -72,6 +73,8 @@ export function loadConfig(): AppConfig {
   return {
     port: parsePort(process.env.PORT?.trim()),
     solanaRpcUrl,
+    sqliteDbPath:
+      process.env.SQLITE_DB_PATH?.trim() || "./src/db/staked-agent.sqlite",
     magicblockPaymentsUrl:
       process.env.MAGICBLOCK_PAYMENTS_URL?.trim() ||
       "https://payments.magicblock.app",
