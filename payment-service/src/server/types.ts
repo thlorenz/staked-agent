@@ -113,6 +113,25 @@ export type RecordedStakePayment = {
   status: "confirmed";
 };
 
+export type StakerSnapshotEntry = {
+  stakerPubkey: string;
+  totalAmount: number;
+  percentageOfTotal: number;
+};
+
+export type StakersTimeline = {
+  firstStakeTimestamp: number | null;
+  lastStakeTimestamp: number | null;
+};
+
+export type StakersSnapshotResponse = {
+  ok: true;
+  timestamp: number;
+  totalStake: number;
+  timeline: StakersTimeline;
+  stakers: StakerSnapshotEntry[];
+};
+
 export type StakerLeaderboardEntry = {
   displayName: string;
   totalAmount: number;

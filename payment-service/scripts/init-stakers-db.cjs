@@ -3,7 +3,8 @@ const path = require("node:path");
 
 const Database = require("better-sqlite3");
 
-const dbPath = process.env.SQLITE_DB_PATH?.trim() || "./src/db/staked-agent.sqlite";
+const dbPath =
+  process.env.SQLITE_DB_PATH?.trim() || "./src/db/staked-agent.sqlite";
 const resolvedPath = path.resolve(dbPath);
 
 fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
