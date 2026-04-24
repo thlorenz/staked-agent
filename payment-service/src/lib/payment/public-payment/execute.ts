@@ -3,7 +3,11 @@
 import type { Connection, PublicKey } from "@solana/web3.js";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 
-import { buildRemotePaymentRequest } from "@/src/lib/payment/shared/api";
+import {
+  buildRemotePaymentRequest,
+  serializeSignedTransactionToBase64,
+  submitRemotePublicStake,
+} from "@/src/lib/payment/shared/api";
 import {
   executeBuiltTransactionWithRetry,
   type StakeDebugLogger,
@@ -60,6 +64,18 @@ export async function executePublicPayment(params: {
     signTransaction,
     setStatus,
     logDebug,
+    submitSignedTransactionOverride: async ({ signedTransaction }) => {
+      setStatus("Submitting signed transaction for verification...");
+      const response = await submitRemotePublicStake({
+        signedTransactionBase64:
+          serializeSignedTransactionToBase64(signedTransaction),
+        stakerPubkey: sender,
+        destination: agentDestination,
+        amount,
+        privacy: "public",
+      });
+      return response.signature;
+    },
     onBuilt: (remoteBuild) => {
       setStatus("Building unsigned transaction...");
       setBuildSummary(

@@ -151,6 +151,10 @@ async function signAndSubmitBuiltTransaction(options: {
   submitConnection?: Connection;
   signTransaction: WalletContextState["signTransaction"];
   setStatus: (value: string | null) => void;
+  submitSignedTransactionOverride?: (params: {
+    signedTransaction: Transaction | VersionedTransaction;
+    submitConnection: Connection;
+  }) => Promise<string>;
   logDebug?: StakeDebugLogger;
 }): Promise<string> {
   const {
@@ -158,6 +162,7 @@ async function signAndSubmitBuiltTransaction(options: {
     submitConnection,
     signTransaction,
     setStatus,
+    submitSignedTransactionOverride,
     transactionBase64,
     logDebug,
   } = options;
@@ -225,6 +230,41 @@ async function signAndSubmitBuiltTransaction(options: {
   });
 
   setStatus("Submitting signed transaction...");
+  if (submitSignedTransactionOverride) {
+    try {
+      return await submitSignedTransactionOverride({
+        signedTransaction,
+        submitConnection: activeConnection,
+      });
+    } catch (error) {
+      let blockHeight: number | null = null;
+      let latestBlockhash: {
+        blockhash: string;
+        lastValidBlockHeight: number;
+      } | null = null;
+      try {
+        blockHeight = await activeConnection.getBlockHeight("confirmed");
+      } catch {
+        blockHeight = null;
+      }
+      try {
+        latestBlockhash =
+          await activeConnection.getLatestBlockhash("confirmed");
+      } catch {
+        latestBlockhash = null;
+      }
+
+      logDebug?.("submit-error", {
+        endpoint: activeConnection.rpcEndpoint,
+        currentBlockHeight: blockHeight,
+        latestBlockhash,
+        signature: signedSignature,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
   try {
     return await submitSignedTransaction(activeConnection, signedTransaction);
   } catch (error) {
@@ -265,6 +305,10 @@ export async function executeBuiltTransactionWithRetry<T>(options: {
   connection: Connection;
   signTransaction: WalletContextState["signTransaction"];
   setStatus: (value: string | null) => void;
+  submitSignedTransactionOverride?: (params: {
+    signedTransaction: Transaction | VersionedTransaction;
+    submitConnection: Connection;
+  }) => Promise<string>;
   logDebug?: StakeDebugLogger;
 }): Promise<string> {
   const maxAttempts = options.maxAttempts ?? 3;
@@ -280,6 +324,8 @@ export async function executeBuiltTransactionWithRetry<T>(options: {
         submitConnection: options.getSubmitConnection?.(built),
         signTransaction: options.signTransaction,
         setStatus: options.setStatus,
+        submitSignedTransactionOverride:
+          options.submitSignedTransactionOverride,
         transactionBase64: options.getTransactionBase64(built),
         logDebug: options.logDebug,
       });
