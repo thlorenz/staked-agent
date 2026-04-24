@@ -35,6 +35,26 @@ export type BuiltTransferResponse = {
   validator?: string;
 };
 
+export type BuiltInitializeMintResponse = BuiltTransferResponse & {
+  transferQueue?: string;
+  rentPda?: string;
+};
+
+export type MintInitializationStatusResponse = {
+  mint: string;
+  validator: string;
+  transferQueue: string;
+  initialized: boolean;
+};
+
+export type PrivateBalanceResponse = {
+  address?: string;
+  mint?: string;
+  ata?: string;
+  location?: string;
+  balance: string;
+};
+
 export type TeeAuthToken = {
   token: string;
 };

@@ -15,7 +15,7 @@
 
 ## Configuration
 
-Copy `.env.example` to `.env` if you want file-based configuration. The sample targets Solana devnet by default.
+Copy `.env.local.example` to `.env.local` for Next.js development with `yarn dev`, or copy `.env.example` to `.env` if you want a generic file-based config. The sample targets Solana devnet by default.
 
 These environment variables control Solana RPC and MagicBlock endpoints:
 
@@ -27,7 +27,7 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 - `MAGICBLOCK_TEE_AUTH_PATH`
 - `AGENT_DESTINATION_PUBKEY`
 
-The sample is configured for devnet by default. The TEE auth endpoint paths are env-configurable placeholders until they are validated against a live MagicBlock integration. Public transfers do not require that auth path in this sample.
+The sample is configured for devnet by default. The TEE auth flow uses MagicBlock's current `/auth/challenge` and `/auth/login` endpoints. Public transfers do not require that auth path in this sample.
 
 The default local keypair path is `./keypairs/01.json`.
 The fixed browser stake destination defaults to `AhJJkA2WBFPKpRjL5JnHZiTkNYDRWhr13cpTRMHDzZNA` when `AGENT_DESTINATION_PUBKEY` is unset.
@@ -102,11 +102,11 @@ curl -X POST http://localhost:3000/api/pay \
 ## Quickstart
 
 ```sh
-cp .env.example .env
+cp .env.local.example .env.local
 mkdir -p keypairs
 # place a real Solana CLI-style keypair at ./keypairs/01.json
 yarn install
-make run
+yarn dev
 curl http://localhost:3000/api/health
 curl http://localhost:3000/api/balance
 curl -X POST http://localhost:3000/api/pay \
@@ -114,6 +114,8 @@ curl -X POST http://localhost:3000/api/pay \
   -d '{"to":"DESTINATION_PUBKEY","amount":1000,"privacy":"private"}'
 make browser-pay
 ```
+
+`.env.local.example` mirrors the `Makefile` defaults used by `make run`, including `NEXT_PUBLIC_SOLANA_RPC_URL` and `NEXT_PUBLIC_CLUSTER`, so plain `yarn dev` gets the same baseline environment.
 
 `make run` uses devnet-oriented defaults, while still letting already-exported environment variables override those values. `NEXT_PUBLIC_SOLANA_RPC_URL` and `NEXT_PUBLIC_CLUSTER` are set from the same server defaults so the future browser wallet flow can use the same environment.
 

@@ -3,10 +3,11 @@ SOLANA_RPC_URL ?= https://api.devnet.solana.com
 MAGICBLOCK_PAYMENTS_URL ?= https://payments.magicblock.app
 MAGICBLOCK_TEE_URL ?= https://devnet-tee.magicblock.app
 MAGICBLOCK_TEE_WS_URL ?= wss://tee.magicblock.app
-MAGICBLOCK_TEE_CHALLENGE_PATH ?= /challenge
-MAGICBLOCK_TEE_AUTH_PATH ?= /authenticate
+MAGICBLOCK_TEE_CHALLENGE_PATH ?= /auth/challenge
+MAGICBLOCK_TEE_AUTH_PATH ?= /auth/login
 CLUSTER ?= devnet
 USDC_MINT ?= 6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW
+VALIDATOR ?= MUS3hc9TCw4cGC12vHNoYcCGzJG1txjgQLZWVoeNHNd
 SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
 VERIFY_TEE ?= false
 
@@ -26,7 +27,12 @@ run:
 	USDC_MINT=$(USDC_MINT) \
 	VALIDATOR="$(VALIDATOR)" \
 	NEXT_PUBLIC_SOLANA_RPC_URL=$(SOLANA_RPC_URL) \
+	NEXT_PUBLIC_MAGICBLOCK_TEE_URL=$(MAGICBLOCK_TEE_URL) \
+	NEXT_PUBLIC_MAGICBLOCK_TEE_WS_URL=$(MAGICBLOCK_TEE_WS_URL) \
+	NEXT_PUBLIC_MAGICBLOCK_ROUTER_URL=https://devnet-router.magicblock.app \
+	NEXT_PUBLIC_MAGICBLOCK_ROUTER_WS_URL=wss://devnet-router.magicblock.app \
 	NEXT_PUBLIC_CLUSTER=$(CLUSTER) \
+	NEXT_PUBLIC_USDC_MINT=$(USDC_MINT) \
 	yarn dev
 
 build:

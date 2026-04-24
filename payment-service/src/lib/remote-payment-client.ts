@@ -1,8 +1,14 @@
 import { Buffer } from "buffer";
 
+import bs58 from "bs58";
 import { Connection, Transaction, VersionedTransaction } from "@solana/web3.js";
 
-import type { RemoteBuildResponse } from "@/src/server/types";
+import type {
+  BuiltInitializeMintResponse,
+  MintInitializationStatusResponse,
+  PrivateBalanceResponse,
+  RemoteBuildResponse,
+} from "@/src/server/types";
 
 type ErrorPayload = {
   error?: string;
@@ -62,11 +68,100 @@ export async function completeRemoteTeeAuth(payload: {
   return body.token;
 }
 
+export async function fetchPrivateMintStatus(payload?: {
+  mint?: string;
+  cluster?: string;
+  validator?: string;
+}): Promise<MintInitializationStatusResponse> {
+  const response = await fetch("/api/remote/private/mint-status", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload ?? {}),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response));
+  }
+
+  return (await response.json()) as MintInitializationStatusResponse;
+}
+
+export async function buildInitializeMintTransaction(payload: {
+  owner: string;
+  payer?: string;
+  mint?: string;
+  cluster?: string;
+  validator?: string;
+}): Promise<BuiltInitializeMintResponse> {
+  const response = await fetch("/api/remote/private/initialize-mint", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response));
+  }
+
+  return (await response.json()) as BuiltInitializeMintResponse;
+}
+
+export async function buildPrivateDepositTransaction(payload: {
+  owner: string;
+  amount: number;
+  mint?: string;
+  cluster?: string;
+  validator?: string;
+}): Promise<BuiltInitializeMintResponse> {
+  const response = await fetch("/api/remote/private/deposit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response));
+  }
+
+  return (await response.json()) as BuiltInitializeMintResponse;
+}
+
+export async function fetchPrivateBalance(payload: {
+  address: string;
+  authToken: string;
+  mint?: string;
+  cluster?: string;
+  validator?: string;
+}): Promise<PrivateBalanceResponse> {
+  const response = await fetch("/api/remote/private/balance", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response));
+  }
+
+  return (await response.json()) as PrivateBalanceResponse;
+}
+
 export async function buildRemotePaymentRequest(payload: {
   from: string;
   to: string;
   amount: number;
   privacy: "public" | "private";
+  fromBalance?: "base" | "ephemeral";
+  toBalance?: "base" | "ephemeral";
+  validator?: string;
   teeAuthToken?: string;
 }): Promise<RemoteBuildResponse> {
   const response = await fetch("/api/remote/build-payment", {
@@ -104,13 +199,44 @@ export function deserializeBuiltTransaction(
   }
 }
 
+function getSignedTransactionSignature(
+  transaction: Transaction | VersionedTransaction,
+): string {
+  if (transaction instanceof VersionedTransaction) {
+    const signature = transaction.signatures[0];
+    if (!signature) {
+      throw new Error("Signed versioned transaction is missing a signature");
+    }
+    return bs58.encode(signature);
+  }
+
+  if (!transaction.signature) {
+    throw new Error("Signed transaction is missing a signature");
+  }
+
+  return bs58.encode(transaction.signature);
+}
+
 export async function submitSignedTransaction(
   connection: Connection,
   transaction: Transaction | VersionedTransaction,
 ): Promise<string> {
-  const signature = await connection.sendRawTransaction(
-    transaction.serialize(),
-  );
+  const serialized = transaction.serialize();
+  const signature = getSignedTransactionSignature(transaction);
+  const useRouter = connection.rpcEndpoint.includes("magicblock.app");
+
+  try {
+    await connection.sendRawTransaction(serialized, {
+      preflightCommitment: "confirmed",
+      skipPreflight: useRouter,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes("already been processed")) {
+      throw error;
+    }
+  }
+
   await connection.confirmTransaction(signature, "confirmed");
   return signature;
 }

@@ -81,9 +81,9 @@ export function loadConfig(): AppConfig {
     magicblockTeeWsUrl:
       process.env.MAGICBLOCK_TEE_WS_URL?.trim() || "wss://tee.magicblock.app",
     magicblockTeeChallengePath:
-      process.env.MAGICBLOCK_TEE_CHALLENGE_PATH?.trim() || "/challenge",
+      process.env.MAGICBLOCK_TEE_CHALLENGE_PATH?.trim() || "/auth/challenge",
     magicblockTeeAuthPath:
-      process.env.MAGICBLOCK_TEE_AUTH_PATH?.trim() || "/authenticate",
+      process.env.MAGICBLOCK_TEE_AUTH_PATH?.trim() || "/auth/login",
     cluster,
     usdcMint: getRequiredEnv("USDC_MINT"),
     validator: process.env.VALIDATOR?.trim() || undefined,
