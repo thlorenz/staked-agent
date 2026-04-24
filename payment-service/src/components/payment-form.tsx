@@ -12,9 +12,11 @@ import {
   completeRemoteTeeAuth,
   deserializeBuiltTransaction,
   fetchRemoteTeeChallenge,
-  submitSignedTransaction
+  submitSignedTransaction,
 } from "@/src/lib/remote-payment-client";
 import type { PrivacyMode } from "@/src/server/types";
+
+type PaymentFormProps = { agentDestination: string };
 
 function parseChallengeBytes(challenge: string): Uint8Array {
   try {
@@ -24,10 +26,9 @@ function parseChallengeBytes(challenge: string): Uint8Array {
   }
 }
 
-export function PaymentForm() {
+export function PaymentForm({ agentDestination }: PaymentFormProps) {
   const { connection } = useConnection();
   const { publicKey, signMessage, signTransaction } = useWallet();
-  const [destination, setDestination] = useState("");
   const [amount, setAmount] = useState("1000");
   const [memo, setMemo] = useState("");
   const [privacy, setPrivacy] = useState<PrivacyMode>("private");
@@ -60,45 +61,45 @@ export function PaymentForm() {
 
       if (privacy === "private") {
         if (!signMessage) {
-          throw new Error(
-            "This wallet does not support private auth signing."
-          );
+          throw new Error("This wallet does not support private auth signing.");
         }
 
         setStatus("Requesting MagicBlock private-payment challenge...");
         const challenge = await fetchRemoteTeeChallenge(sender);
-        const signedChallenge = await signMessage(parseChallengeBytes(challenge));
+        const signedChallenge = await signMessage(
+          parseChallengeBytes(challenge),
+        );
         teeAuthToken = await completeRemoteTeeAuth({
           publicKey: sender,
           challenge,
-          signature: bs58.encode(signedChallenge)
+          signature: bs58.encode(signedChallenge),
         });
       }
 
       setStatus("Building unsigned transaction...");
       const remoteBuild = await buildRemotePaymentRequest({
         from: sender,
-        to: destination,
+        to: agentDestination,
         amount: parsedAmount,
         memo: memo || undefined,
         privacy,
-        teeAuthToken
+        teeAuthToken,
       });
 
       setBuildSummary(
-        `kind=${remoteBuild.build.kind} privacy=${remoteBuild.privacy} destination=${remoteBuild.destination}`
+        `kind=${remoteBuild.build.kind} privacy=${remoteBuild.privacy} destination=${remoteBuild.destination}`,
       );
 
       setStatus("Signing transaction with wallet...");
       const transaction = deserializeBuiltTransaction(
-        remoteBuild.build.transactionBase64
+        remoteBuild.build.transactionBase64,
       );
       const signedTransaction = await signTransaction(transaction);
 
       setStatus("Submitting signed transaction...");
       const txSignature = await submitSignedTransaction(
         connection,
-        signedTransaction
+        signedTransaction,
       );
 
       setSignature(txSignature);
@@ -133,8 +134,7 @@ export function PaymentForm() {
             <input
               name="destination"
               type="text"
-              value={destination}
-              onChange={(event) => setDestination(event.target.value)}
+              defaultValue={agentDestination}
               placeholder="Destination pubkey"
             />
           </label>
@@ -167,7 +167,9 @@ export function PaymentForm() {
             <select
               name="privacy"
               value={privacy}
-              onChange={(event) => setPrivacy(event.target.value as PrivacyMode)}
+              onChange={(event) =>
+                setPrivacy(event.target.value as PrivacyMode)
+              }
             >
               <option value="private">private</option>
               <option value="public">public</option>
@@ -183,7 +185,9 @@ export function PaymentForm() {
       <section className="panel">
         <h2>Result</h2>
         <div className="result-box">
-          <p>{status ?? "Connect a wallet to begin the remote signing flow."}</p>
+          <p>
+            {status ?? "Connect a wallet to begin the remote signing flow."}
+          </p>
           {buildSummary ? <p>{buildSummary}</p> : null}
           {signature ? <p>Signature: {signature}</p> : null}
         </div>

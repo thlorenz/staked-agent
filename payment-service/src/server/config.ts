@@ -1,5 +1,10 @@
 import "dotenv/config";
 
+import { parsePublicKey } from "@/src/server/solana";
+
+const DEFAULT_AGENT_DESTINATION =
+  "AhJJkA2WBFPKpRjL5JnHZiTkNYDRWhr13cpTRMHDzZNA";
+
 export type AppConfig = {
   port: number;
   solanaRpcUrl: string;
@@ -15,6 +20,7 @@ export type AppConfig = {
   verifyTee: boolean;
   nextPublicSolanaRpcUrl: string;
   nextPublicCluster: string;
+  agentDestination: string;
 };
 
 function getRequiredEnv(name: string): string {
@@ -59,6 +65,9 @@ function parseVerifyTee(value: string | undefined): boolean {
 export function loadConfig(): AppConfig {
   const solanaRpcUrl = getRequiredEnv("SOLANA_RPC_URL");
   const cluster = process.env.CLUSTER?.trim() || "devnet";
+  const agentDestination =
+    process.env.AGENT_DESTINATION_PUBKEY?.trim() || DEFAULT_AGENT_DESTINATION;
+  parsePublicKey(agentDestination, "AGENT_DESTINATION_PUBKEY");
 
   return {
     port: parsePort(process.env.PORT?.trim()),
@@ -83,6 +92,7 @@ export function loadConfig(): AppConfig {
     verifyTee: parseVerifyTee(process.env.VERIFY_TEE?.trim()),
     nextPublicSolanaRpcUrl:
       process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim() || solanaRpcUrl,
-    nextPublicCluster: process.env.NEXT_PUBLIC_CLUSTER?.trim() || cluster
+    nextPublicCluster: process.env.NEXT_PUBLIC_CLUSTER?.trim() || cluster,
+    agentDestination,
   };
 }
