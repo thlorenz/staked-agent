@@ -646,14 +646,13 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
           {buildSummary ? <p>{buildSummary}</p> : null}
           {signature ? (
             <p>
-              Stake transaction:{" "}
-              <a
-                href={getExplorerUrl(signature, cluster)}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                {signature}
-              </a>
+              Stake transaction signature: <code>{signature}</code>
+            </p>
+          ) : null}
+          {signature ? (
+            <p>
+              Private routed transactions are not reliably visible on Solana
+              Explorer. Query them via <code>https://devnet-router.magicblock.app</code>.
             </p>
           ) : null}
         </div>

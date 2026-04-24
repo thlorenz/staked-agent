@@ -237,6 +237,29 @@ export async function submitSignedTransaction(
     }
   }
 
-  await connection.confirmTransaction(signature, "confirmed");
+  const confirmation = await connection.confirmTransaction(signature, "confirmed");
+  if (confirmation.value.err) {
+    throw new Error(
+      `Transaction failed during confirmation: ${JSON.stringify(confirmation.value.err)}`,
+    );
+  }
+
+  const statuses = await connection.getSignatureStatuses([signature], {
+    searchTransactionHistory: true,
+  });
+  const status = statuses.value[0];
+  if (status?.err) {
+    throw new Error(`Transaction failed with status: ${JSON.stringify(status.err)}`);
+  }
+
+  const transactionDetails = await connection.getTransaction(signature, {
+    maxSupportedTransactionVersion: 0,
+  });
+  if (transactionDetails?.meta?.err) {
+    throw new Error(
+      `Transaction failed with meta.err: ${JSON.stringify(transactionDetails.meta.err)}`,
+    );
+  }
+
   return signature;
 }
