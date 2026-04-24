@@ -24,7 +24,7 @@ export function getClientConfig(): {
         routerUrl: "https://devnet-router.magicblock.app",
         routerWsUrl: "wss://devnet-router.magicblock.app",
         cluster: "devnet",
-        mint: "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW"
+        mint: "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW",
       };
     }
     throw new Error("Missing NEXT_PUBLIC_SOLANA_RPC_URL");
@@ -39,7 +39,7 @@ export function getClientConfig(): {
         routerUrl: routerUrl || "https://devnet-router.magicblock.app",
         routerWsUrl: routerWsUrl || "wss://devnet-router.magicblock.app",
         cluster: "devnet",
-        mint: mint || "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW"
+        mint: mint || "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW",
       };
     }
     throw new Error("Missing NEXT_PUBLIC_CLUSTER");
@@ -54,7 +54,7 @@ export function getClientConfig(): {
         routerUrl: routerUrl || "https://devnet-router.magicblock.app",
         routerWsUrl: routerWsUrl || "wss://devnet-router.magicblock.app",
         cluster,
-        mint: "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW"
+        mint: "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW",
       };
     }
     throw new Error("Missing NEXT_PUBLIC_USDC_MINT");
@@ -67,6 +67,6 @@ export function getClientConfig(): {
     routerUrl: routerUrl || "https://devnet-router.magicblock.app",
     routerWsUrl: routerWsUrl || "wss://devnet-router.magicblock.app",
     cluster,
-    mint
+    mint,
   };
 }

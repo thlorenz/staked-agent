@@ -1,6 +1,6 @@
 import { loadConfig } from "@/src/server/config";
 import { jsonError, jsonOk } from "@/src/server/http";
-import { buildDeposit } from "@/src/server/magicblock";
+import { buildPrivateDeposit } from "@/src/server/payments/private-payment/deposit";
 
 type DepositRequestBody = {
   owner?: string;
@@ -15,7 +15,11 @@ export async function POST(request: Request): Promise<Response> {
     const body = (await request.json()) as DepositRequestBody;
 
     if (typeof body.owner !== "string" || body.owner.trim() === "") {
-      return jsonError(400, "Invalid request body", "`owner` must be a non-empty string");
+      return jsonError(
+        400,
+        "Invalid request body",
+        "`owner` must be a non-empty string",
+      );
     }
 
     if (
@@ -24,16 +28,20 @@ export async function POST(request: Request): Promise<Response> {
       !Number.isInteger(body.amount) ||
       body.amount <= 0
     ) {
-      return jsonError(400, "Invalid request body", "`amount` must be a positive integer");
+      return jsonError(
+        400,
+        "Invalid request body",
+        "`amount` must be a positive integer",
+      );
     }
 
     const config = loadConfig();
-    const response = await buildDeposit(config, {
+    const response = await buildPrivateDeposit(config, {
       owner: body.owner.trim(),
       amount: body.amount,
       mint: body.mint?.trim() || config.usdcMint,
       cluster: body.cluster?.trim() || config.cluster,
-      validator: body.validator?.trim() || undefined
+      validator: body.validator?.trim() || undefined,
     });
 
     return jsonOk(response);

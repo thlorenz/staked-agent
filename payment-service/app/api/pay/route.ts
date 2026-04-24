@@ -11,7 +11,7 @@ function isBadRequest(details: string): boolean {
     "`to` must be a non-empty string",
     "`amount` must be a positive integer",
     "`privacy` must be either `public` or `private`",
-    "Sender is not listed in requiredSigners"
+    "Sender is not listed in requiredSigners",
   ].includes(details);
 }
 

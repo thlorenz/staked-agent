@@ -1,6 +1,6 @@
 import { loadConfig } from "@/src/server/config";
 import { jsonError, jsonOk } from "@/src/server/http";
-import { getMintInitializationStatus } from "@/src/server/magicblock";
+import { getPrivateMintStatus } from "@/src/server/payments/private-payment/mint";
 
 type MintStatusRequestBody = {
   mint?: string;
@@ -12,10 +12,10 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const body = (await request.json()) as MintStatusRequestBody;
     const config = loadConfig();
-    const response = await getMintInitializationStatus(config, {
+    const response = await getPrivateMintStatus(config, {
       mint: body.mint?.trim() || config.usdcMint,
       cluster: body.cluster?.trim() || config.cluster,
-      validator: body.validator?.trim() || undefined
+      validator: body.validator?.trim() || undefined,
     });
 
     return jsonOk(response);
@@ -25,6 +25,10 @@ export async function POST(request: Request): Promise<Response> {
       return jsonError(502, "Upstream MagicBlock request failed", details);
     }
 
-    return jsonError(500, "Unable to query mint initialization status", details);
+    return jsonError(
+      500,
+      "Unable to query mint initialization status",
+      details,
+    );
   }
 }

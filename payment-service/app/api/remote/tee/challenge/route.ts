@@ -1,6 +1,6 @@
 import { loadConfig } from "@/src/server/config";
 import { jsonError, jsonOk } from "@/src/server/http";
-import { createRemoteTeeChallenge } from "@/src/server/payments/tee-auth";
+import { createRemoteTeeChallenge } from "@/src/server/payments/private-payment/tee-auth";
 
 type ChallengeRequestBody = {
   publicKey?: string;
@@ -10,12 +10,16 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const body = (await request.json()) as ChallengeRequestBody;
     if (typeof body.publicKey !== "string" || body.publicKey.trim() === "") {
-      return jsonError(400, "Invalid request body", "`publicKey` must be a non-empty string");
+      return jsonError(
+        400,
+        "Invalid request body",
+        "`publicKey` must be a non-empty string",
+      );
     }
 
     const response = await createRemoteTeeChallenge(
       loadConfig(),
-      body.publicKey.trim()
+      body.publicKey.trim(),
     );
 
     return jsonOk(response);

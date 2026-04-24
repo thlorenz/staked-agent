@@ -1,6 +1,6 @@
 import { loadConfig } from "@/src/server/config";
 import { jsonError, jsonOk } from "@/src/server/http";
-import { getPrivateBalance } from "@/src/server/magicblock";
+import { getPrivatePaymentBalance } from "@/src/server/payments/private-payment/balance";
 
 type PrivateBalanceRequestBody = {
   address?: string;
@@ -15,20 +15,28 @@ export async function POST(request: Request): Promise<Response> {
     const body = (await request.json()) as PrivateBalanceRequestBody;
 
     if (typeof body.address !== "string" || body.address.trim() === "") {
-      return jsonError(400, "Invalid request body", "`address` must be a non-empty string");
+      return jsonError(
+        400,
+        "Invalid request body",
+        "`address` must be a non-empty string",
+      );
     }
 
     if (typeof body.authToken !== "string" || body.authToken.trim() === "") {
-      return jsonError(400, "Invalid request body", "`authToken` must be a non-empty string");
+      return jsonError(
+        400,
+        "Invalid request body",
+        "`authToken` must be a non-empty string",
+      );
     }
 
     const config = loadConfig();
-    const response = await getPrivateBalance(config, {
+    const response = await getPrivatePaymentBalance(config, {
       address: body.address.trim(),
       authToken: body.authToken.trim(),
       mint: body.mint?.trim() || config.usdcMint,
       cluster: body.cluster?.trim() || config.cluster,
-      validator: body.validator?.trim() || undefined
+      validator: body.validator?.trim() || undefined,
     });
 
     return jsonOk(response);

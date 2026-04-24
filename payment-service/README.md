@@ -60,16 +60,15 @@ The browser stake flow is:
 
 - connect Phantom
 - review the fixed configured destination shown in the form
-- review the fixed `private` privacy mode shown in the form
+- choose `public` or `private` in the privacy toggle
 - enter the amount to stake
-- request a MagicBlock private-payment challenge
-- let the wallet sign the challenge
+- if `private`, request a MagicBlock private-payment challenge and let the wallet sign it
 - let the server build the unsigned transaction
 - let the wallet sign the transaction
 - submit the signed transaction through Solana RPC
 - open the Solana Explorer transaction link shown after a successful submission
 
-The current browser UI always stakes privately to the configured agent destination. Destination and privacy are readonly in the form, memo entry is not part of this flow, and successful submissions show a `Stake transaction` Solana Explorer link.
+The current browser UI defaults to `public`, but can switch to `private` when needed. Destination is readonly in the form, memo entry is not part of this flow, and successful submissions show a `Stake transaction` Solana Explorer link.
 
 The preserved built-in-keypair test path is:
 
@@ -83,7 +82,7 @@ For `POST /api/pay`, the sample defaults:
 
 - `mint` to `USDC_MINT`
 - `cluster` to `CLUSTER`
-- `privacy` to `private`
+- `privacy` to `public`
 
 The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The server signs with the local JSON keypair at `./keypairs/01.json` for this preserved custodial test route.
 

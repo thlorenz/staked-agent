@@ -1,21 +1,21 @@
 import type { AppConfig } from "@/src/server/config";
 import {
   authenticateTeeChallenge,
-  requestTeeChallenge
+  requestTeeChallenge,
 } from "@/src/server/magicblock";
 import type {
   RemoteTeeAuthResponse,
-  TeeChallengeResponse
+  TeeChallengeResponse,
 } from "@/src/server/types";
 
 export async function createRemoteTeeChallenge(
   config: AppConfig,
-  publicKey: string
+  publicKey: string,
 ): Promise<TeeChallengeResponse> {
   const challenge = await requestTeeChallenge(config, publicKey);
   return {
     ok: true,
-    challenge
+    challenge,
   };
 }
 
@@ -25,11 +25,11 @@ export async function completeRemoteTeeAuth(
     publicKey: string;
     challenge: string;
     signature: string;
-  }
+  },
 ): Promise<RemoteTeeAuthResponse> {
   const { token } = await authenticateTeeChallenge(config, payload);
   return {
     ok: true,
-    token
+    token,
   };
 }

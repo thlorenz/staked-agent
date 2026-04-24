@@ -237,7 +237,10 @@ export async function submitSignedTransaction(
     }
   }
 
-  const confirmation = await connection.confirmTransaction(signature, "confirmed");
+  const confirmation = await connection.confirmTransaction(
+    signature,
+    "confirmed",
+  );
   if (confirmation.value.err) {
     throw new Error(
       `Transaction failed during confirmation: ${JSON.stringify(confirmation.value.err)}`,
@@ -249,7 +252,9 @@ export async function submitSignedTransaction(
   });
   const status = statuses.value[0];
   if (status?.err) {
-    throw new Error(`Transaction failed with status: ${JSON.stringify(status.err)}`);
+    throw new Error(
+      `Transaction failed with status: ${JSON.stringify(status.err)}`,
+    );
   }
 
   const transactionDetails = await connection.getTransaction(signature, {

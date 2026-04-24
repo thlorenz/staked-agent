@@ -2,7 +2,7 @@ import { parsePublicKey } from "@/src/server/solana";
 
 import type {
   NormalizedPaymentRequest,
-  PaymentRequestInput
+  PaymentRequestInput,
 } from "@/src/server/payments/types";
 import type { PrivacyMode } from "@/src/server/types";
 
@@ -14,7 +14,7 @@ export function normalizePaymentRequest(
     defaultCluster: string;
     defaultValidator?: string;
     defaultPrivacy?: PrivacyMode;
-  }
+  },
 ): NormalizedPaymentRequest {
   if (typeof input.to !== "string" || input.to.trim() === "") {
     throw new Error("`to` must be a non-empty string");
@@ -52,11 +52,11 @@ export function normalizePaymentRequest(
     amount: input.amount,
     mint: input.mint?.trim() || defaults.defaultMint,
     cluster: input.cluster?.trim() || defaults.defaultCluster,
-    privacy: input.privacy ?? defaults.defaultPrivacy ?? "private",
+    privacy: input.privacy ?? defaults.defaultPrivacy ?? "public",
     validator: input.validator?.trim() || defaults.defaultValidator,
     memo: input.memo,
     fromBalance: input.fromBalance ?? "base",
     toBalance: input.toBalance ?? "base",
-    teeAuthToken: input.teeAuthToken
+    teeAuthToken: input.teeAuthToken,
   };
 }

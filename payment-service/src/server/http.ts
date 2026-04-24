@@ -3,20 +3,20 @@ export function jsonOk<T>(body: T, init?: ResponseInit): Response {
     ...init,
     headers: {
       "content-type": "application/json",
-      ...init?.headers
-    }
+      ...init?.headers,
+    },
   });
 }
 
 export function jsonError(
   status: number,
   error: string,
-  details?: string
+  details?: string,
 ): Response {
   return new Response(JSON.stringify({ ok: false, error, details }), {
     status,
     headers: {
-      "content-type": "application/json"
-    }
+      "content-type": "application/json",
+    },
   });
 }

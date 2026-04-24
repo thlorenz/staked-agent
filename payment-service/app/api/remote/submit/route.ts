@@ -17,13 +17,13 @@ export async function POST(request: Request): Promise<Response> {
       return jsonError(
         400,
         "Invalid request body",
-        "`signedTransactionBase64` must be a non-empty string"
+        "`signedTransactionBase64` must be a non-empty string",
       );
     }
 
     const response = await submitSignedTransactionBase64(
       loadConfig(),
-      body.signedTransactionBase64.trim()
+      body.signedTransactionBase64.trim(),
     );
 
     return jsonOk(response);
@@ -31,7 +31,7 @@ export async function POST(request: Request): Promise<Response> {
     return jsonError(
       500,
       "Unable to submit signed transaction",
-      error instanceof Error ? error.message : String(error)
+      error instanceof Error ? error.message : String(error),
     );
   }
 }

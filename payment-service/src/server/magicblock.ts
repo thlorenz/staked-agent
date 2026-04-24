@@ -9,7 +9,7 @@ import {
   BuiltTransferResponse,
   MintInitializationStatusResponse,
   PrivateBalanceResponse,
-  TeeAuthToken
+  TeeAuthToken,
 } from "@/src/server/types";
 
 type ChallengeResponse = {
@@ -58,14 +58,14 @@ async function parseJsonResponse<T>(response: Response): Promise<T> {
     throw new Error(
       `Expected JSON response but received: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 }
 
 function withQuery(
   baseUrl: string,
-  params: Record<string, string | undefined>
+  params: Record<string, string | undefined>,
 ): string {
   const url = new URL(baseUrl);
 
@@ -90,18 +90,18 @@ export async function getTeeIdentity(config: AppConfig): Promise<string> {
   const response = await fetch(joinUrl(config.magicblockTeeUrl, "/"), {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       jsonrpc: "2.0",
       id: 1,
-      method: "getIdentity"
-    })
+      method: "getIdentity",
+    }),
   });
 
   if (!response.ok) {
     throw new Error(
-      `TEE identity request failed with status ${response.status}: ${await response.text()}`
+      `TEE identity request failed with status ${response.status}: ${await response.text()}`,
     );
   }
 
@@ -120,7 +120,7 @@ export async function getTeeIdentity(config: AppConfig): Promise<string> {
 
 export async function resolvePrivateValidator(
   config: AppConfig,
-  validator?: string
+  validator?: string,
 ): Promise<string> {
   if (validator?.trim()) {
     return validator.trim();
@@ -139,7 +139,7 @@ export async function getMintInitializationStatus(
     mint: string;
     cluster: string;
     validator?: string;
-  }
+  },
 ): Promise<MintInitializationStatusResponse> {
   const validator = await resolvePrivateValidator(config, payload.validator);
   const response = await fetch(
@@ -148,22 +148,23 @@ export async function getMintInitializationStatus(
       {
         mint: payload.mint,
         cluster: payload.cluster,
-        validator
-      }
-    )
+        validator,
+      },
+    ),
   );
 
   if (!response.ok) {
     throw new Error(
-      `MagicBlock mint status request failed with status ${response.status}: ${await response.text()}`
+      `MagicBlock mint status request failed with status ${response.status}: ${await response.text()}`,
     );
   }
 
-  const body = await parseJsonResponse<MintInitializationStatusResponse>(
-    response
-  );
+  const body =
+    await parseJsonResponse<MintInitializationStatusResponse>(response);
   if (!body.validator || typeof body.initialized !== "boolean") {
-    throw new Error("MagicBlock mint status response was missing required fields");
+    throw new Error(
+      "MagicBlock mint status response was missing required fields",
+    );
   }
 
   return body;
@@ -177,7 +178,7 @@ export async function buildInitializeMint(
     mint: string;
     cluster: string;
     validator?: string;
-  }
+  },
 ): Promise<BuiltInitializeMintResponse> {
   const validator = await resolvePrivateValidator(config, payload.validator);
   const response = await fetch(
@@ -185,34 +186,34 @@ export async function buildInitializeMint(
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         owner: payload.owner,
         payer: payload.payer,
         mint: payload.mint,
         cluster: payload.cluster,
-        validator
-      })
-    }
+        validator,
+      }),
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `MagicBlock initialize mint failed with status ${response.status}: ${await response.text()}`
+      `MagicBlock initialize mint failed with status ${response.status}: ${await response.text()}`,
     );
   }
 
   const body = await parseJsonResponse<BuiltInitializeMintResponse>(response);
   if (!body.transactionBase64) {
     throw new Error(
-      "MagicBlock initialize mint response did not include transactionBase64"
+      "MagicBlock initialize mint response did not include transactionBase64",
     );
   }
 
   return {
     ...body,
-    validator: body.validator ?? validator
+    validator: body.validator ?? validator,
   };
 }
 
@@ -224,7 +225,7 @@ export async function buildDeposit(
     mint: string;
     cluster: string;
     validator?: string;
-  }
+  },
 ): Promise<BuiltTransferResponse> {
   const validator = await resolvePrivateValidator(config, payload.validator);
   const response = await fetch(
@@ -232,7 +233,7 @@ export async function buildDeposit(
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         owner: payload.owner,
@@ -243,27 +244,27 @@ export async function buildDeposit(
         initIfMissing: true,
         initVaultIfMissing: true,
         initAtasIfMissing: true,
-        idempotent: true
-      })
-    }
+        idempotent: true,
+      }),
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `MagicBlock deposit build failed with status ${response.status}: ${await response.text()}`
+      `MagicBlock deposit build failed with status ${response.status}: ${await response.text()}`,
     );
   }
 
   const body = await parseJsonResponse<BuiltTransferResponse>(response);
   if (!body.transactionBase64) {
     throw new Error(
-      "MagicBlock deposit response did not include transactionBase64"
+      "MagicBlock deposit response did not include transactionBase64",
     );
   }
 
   return {
     ...body,
-    validator: body.validator ?? validator
+    validator: body.validator ?? validator,
   };
 }
 
@@ -275,7 +276,7 @@ export async function getPrivateBalance(
     mint: string;
     cluster: string;
     validator?: string;
-  }
+  },
 ): Promise<PrivateBalanceResponse> {
   const validator = await resolvePrivateValidator(config, payload.validator);
   const response = await fetch(
@@ -285,25 +286,27 @@ export async function getPrivateBalance(
         address: payload.address,
         mint: payload.mint,
         cluster: payload.cluster,
-        validator
-      }
+        validator,
+      },
     ),
     {
       headers: {
-        Authorization: `Bearer ${payload.authToken}`
-      }
-    }
+        Authorization: `Bearer ${payload.authToken}`,
+      },
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `MagicBlock private balance request failed with status ${response.status}: ${await response.text()}`
+      `MagicBlock private balance request failed with status ${response.status}: ${await response.text()}`,
     );
   }
 
   const body = await parseJsonResponse<PrivateBalanceResponse>(response);
   if (typeof body.balance !== "string") {
-    throw new Error("MagicBlock private balance response was missing required fields");
+    throw new Error(
+      "MagicBlock private balance response was missing required fields",
+    );
   }
 
   return body;
@@ -311,38 +314,37 @@ export async function getPrivateBalance(
 
 export async function getTeeAuthToken(
   config: AppConfig,
-  signer: Keypair
+  signer: Keypair,
 ): Promise<TeeAuthToken> {
   const publicKey = signer.publicKey.toBase58();
   const challenge = await requestTeeChallenge(config, publicKey);
   const signature = nacl.sign.detached(
     parseChallengeBytes(challenge),
-    signer.secretKey
+    signer.secretKey,
   );
   return authenticateTeeChallenge(config, {
     publicKey,
     challenge,
-    signature: bs58.encode(signature)
+    signature: bs58.encode(signature),
   });
 }
 
 export async function requestTeeChallenge(
   config: AppConfig,
-  publicKey: string
+  publicKey: string,
 ): Promise<string> {
   const challengeResponse = await fetch(
-    `${joinUrl(config.magicblockTeeUrl, "/auth/challenge")}?pubkey=${encodeURIComponent(publicKey)}`
+    `${joinUrl(config.magicblockTeeUrl, "/auth/challenge")}?pubkey=${encodeURIComponent(publicKey)}`,
   );
 
   if (!challengeResponse.ok) {
     throw new Error(
-      `TEE challenge request failed with status ${challengeResponse.status}: ${await challengeResponse.text()}`
+      `TEE challenge request failed with status ${challengeResponse.status}: ${await challengeResponse.text()}`,
     );
   }
 
-  const challengeBody = await parseJsonResponse<ChallengeResponse>(
-    challengeResponse
-  );
+  const challengeBody =
+    await parseJsonResponse<ChallengeResponse>(challengeResponse);
   if (challengeBody.error) {
     throw new Error(`TEE challenge request failed: ${challengeBody.error}`);
   }
@@ -359,26 +361,26 @@ export async function authenticateTeeChallenge(
     publicKey: string;
     challenge: string;
     signature: string;
-  }
+  },
 ): Promise<TeeAuthToken> {
   const authResponse = await fetch(
     joinUrl(config.magicblockTeeUrl, "/auth/login"),
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         pubkey: payload.publicKey,
         challenge: payload.challenge,
-        signature: payload.signature
-      })
-    }
+        signature: payload.signature,
+      }),
+    },
   );
 
   if (!authResponse.ok) {
     throw new Error(
-      `TEE auth request failed with status ${authResponse.status}: ${await authResponse.text()}`
+      `TEE auth request failed with status ${authResponse.status}: ${await authResponse.text()}`,
     );
   }
 
@@ -395,39 +397,42 @@ export async function authenticateTeeChallenge(
 
 export async function buildTransfer(
   config: AppConfig,
-  params: BuildTransferParams
+  params: BuildTransferParams,
 ): Promise<BuiltTransferResponse> {
   const resolvedParams =
     params.visibility === "private"
       ? {
           ...params,
-          validator: await resolvePrivateValidator(config, params.validator)
+          validator: await resolvePrivateValidator(config, params.validator),
         }
       : params;
 
-  const response = await fetch(`${config.magicblockPaymentsUrl}/v1/spl/transfer`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
+  const response = await fetch(
+    `${config.magicblockPaymentsUrl}/v1/spl/transfer`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(resolvedParams),
     },
-    body: JSON.stringify(resolvedParams)
-  });
+  );
 
   if (!response.ok) {
     throw new Error(
-      `MagicBlock transfer build failed with status ${response.status}: ${await response.text()}`
+      `MagicBlock transfer build failed with status ${response.status}: ${await response.text()}`,
     );
   }
 
   const payload = await parseJsonResponse<BuiltTransferResponse>(response);
   if (!payload.transactionBase64) {
     throw new Error(
-      "MagicBlock transfer response did not include transactionBase64"
+      "MagicBlock transfer response did not include transactionBase64",
     );
   }
 
   return {
     ...payload,
-    validator: payload.validator ?? resolvedParams.validator
+    validator: payload.validator ?? resolvedParams.validator,
   };
 }
