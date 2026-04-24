@@ -94,7 +94,39 @@ export type RemoteTeeAuthResponse = {
   token: string;
 };
 
+export type PublicStakeSubmitRequest = {
+  signedTransactionBase64: string;
+  stakerPubkey: string;
+  destination: string;
+  amount: number;
+  privacy: "public";
+};
+
+export type RecordedStakePayment = {
+  signature: string;
+  stakerPubkey: string;
+  agentPubkey: string;
+  amount: number;
+  slot: number;
+  blockTime: number | null;
+  stakedAt: string;
+  status: "confirmed";
+};
+
+export type StakerLeaderboardEntry = {
+  displayName: string;
+  totalAmount: number;
+  stakeCount: number;
+  firstStakeUnixSeconds: number;
+};
+
+export type StakersResponse = {
+  ok: true;
+  stakers: StakerLeaderboardEntry[];
+};
+
 export type RemoteSubmitResponse = {
   ok: true;
   signature: string;
+  recordedStake: RecordedStakePayment;
 };

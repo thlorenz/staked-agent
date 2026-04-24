@@ -26,6 +26,7 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 - `MAGICBLOCK_TEE_CHALLENGE_PATH`
 - `MAGICBLOCK_TEE_AUTH_PATH`
 - `AGENT_DESTINATION_PUBKEY`
+- `SQLITE_DB_PATH`
 
 The sample is configured for devnet by default. The TEE auth flow uses MagicBlock's current `/auth/challenge` and `/auth/login` endpoints. Public transfers do not require that auth path in this sample.
 
@@ -39,6 +40,26 @@ The service expects a Solana CLI-style keypair file:
 ```json
 [12,34,56,...]
 ```
+
+## Stake persistence
+
+Public browser stakes are recorded only after the server confirms the on-chain transaction and verifies the submitted details against the confirmed result.
+
+This persistence currently applies only to the public payment staking flow. Private payments are not recorded by this feature.
+
+The default SQLite database path is `./src/db/staked-agent.sqlite`.
+
+Recorded fields:
+
+- `signature`
+- `staker_pubkey`
+- `agent_pubkey`
+- `amount`
+- `slot`
+- `block_time`
+- `staked_at`
+
+This version does not add automated tests for the SQLite persistence or on-chain verification path.
 
 ## Endpoints
 
@@ -65,7 +86,7 @@ The browser stake flow is:
 - if `private`, request a MagicBlock private-payment challenge and let the wallet sign it
 - let the server build the unsigned transaction
 - let the wallet sign the transaction
-- submit the signed transaction through Solana RPC
+- submit the signed public transaction through the server for verification and persistence before success is shown
 - open the Solana Explorer transaction link shown after a successful submission
 
 The current browser UI defaults to `public`, but can switch to `private` when needed. Destination is readonly in the form, memo entry is not part of this flow, and successful submissions show a `Stake transaction` Solana Explorer link.
@@ -140,6 +161,19 @@ The main difference is who signs:
 - `/api/pay` uses the built-in keypair on the server
 - the browser flow uses the connected wallet in Phantom
 
+## Stakers leaderboard
+
+- `GET /api/stakers` returns anonymous staker rows only and never exposes real pubkeys.
+- `/stakers` renders the leaderboard page.
+- Each row shows the total recorded amount and the stake count for that staker.
+- Stake count is derived from the number of persisted verified public stake rows for that staker.
+
+## Database init
+
+- `make init-stakers-db` creates the SQLite database file if needed and applies the stakers table schema.
+- `make reset-stakers-db` deletes the SQLite database file and recreates an empty schema.
+- `make run` now runs that initialization step before starting the Next.js server.
+
 ## Known limitations
 
 - The sample is custodial.
@@ -148,3 +182,4 @@ The main difference is who signs:
 - The TEE auth endpoint paths are placeholders pending confirmation.
 - TEE attestation is intentionally not implemented.
 - Split payments and delayed scheduling are not implemented.
+- Only public browser staking is persisted in this version.

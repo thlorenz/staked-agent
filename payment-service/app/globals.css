@@ -15,6 +15,7 @@ body {
   background:
     radial-gradient(circle at top, rgba(221, 209, 168, 0.55), transparent 30%),
     linear-gradient(180deg, #f5f4ef 0%, #ede8dd 100%);
+  color: #152216;
 }
 
 button,
@@ -29,6 +30,38 @@ select {
   padding: 48px 20px 64px;
   display: grid;
   gap: 20px;
+}
+
+.app-nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 92, 58, 0.18);
+  background: rgba(243, 239, 230, 0.88);
+  color: #244230;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(31, 39, 26, 0.05);
+}
+
+.nav-link:hover {
+  border-color: rgba(31, 92, 58, 0.3);
+  background: #f7f4ea;
+}
+
+.nav-link-active {
+  background: #1f5c3a;
+  border-color: #1f5c3a;
+  color: #fff;
 }
 
 .panel {
@@ -128,6 +161,44 @@ select {
   text-decoration: underline;
 }
 
+.table-scroll {
+  overflow-x: auto;
+}
+
+.stakers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stakers-table th,
+.stakers-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(26, 46, 28, 0.12);
+  text-align: left;
+}
+
+.stakers-table th {
+  color: #6b765b;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.numeric-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.pubkey-cell {
+  word-break: break-all;
+}
+
+.empty-state {
+  margin: 0;
+  color: #46523e;
+}
+
 @media (max-width: 640px) {
   .page-shell {
     padding: 24px 14px 40px;
@@ -135,5 +206,18 @@ select {
 
   .panel {
     padding: 18px;
+  }
+
+  .app-nav {
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    min-height: 40px;
+  }
+
+  .stakers-table th,
+  .stakers-table td {
+    padding: 12px 10px;
   }
 }

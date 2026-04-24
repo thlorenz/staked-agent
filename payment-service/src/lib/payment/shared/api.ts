@@ -1,8 +1,17 @@
 import { Buffer } from "buffer";
 
 import bs58 from "bs58";
-import { Connection, Transaction, VersionedTransaction } from "@solana/web3.js";
+import {
+  Connection,
+  SendTransactionError,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
+import type {
+  PublicStakeSubmitRequest,
+  RemoteSubmitResponse,
+} from "@/src/server/types";
 import type {
   BuiltInitializeMintResponse,
   MintInitializationStatusResponse,
@@ -179,6 +188,24 @@ export async function buildRemotePaymentRequest(payload: {
   return (await response.json()) as RemoteBuildResponse;
 }
 
+export async function submitRemotePublicStake(
+  payload: PublicStakeSubmitRequest,
+): Promise<RemoteSubmitResponse> {
+  const response = await fetch("/api/remote/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response));
+  }
+
+  return (await response.json()) as RemoteSubmitResponse;
+}
+
 function base64ToBytes(value: string): Uint8Array {
   return Uint8Array.from(Buffer.from(value, "base64"));
 }
@@ -197,6 +224,12 @@ export function deserializeBuiltTransaction(
       throw new Error("Unable to deserialize transactionBase64");
     }
   }
+}
+
+export function serializeSignedTransactionToBase64(
+  transaction: Transaction | VersionedTransaction,
+): string {
+  return Buffer.from(transaction.serialize()).toString("base64");
 }
 
 function getSignedTransactionSignature(
@@ -232,8 +265,24 @@ export async function submitSignedTransaction(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (!message.includes("already been processed")) {
-      throw error;
+    if (error instanceof SendTransactionError) {
+      const logs = await error.getLogs(connection).catch(() => error.logs);
+      if (
+        message.includes("already been processed") ||
+        logs?.some((log) => log.includes("already been processed"))
+      ) {
+        // Treat duplicate preflight results as success and continue to confirmation.
+      } else {
+        throw new Error(
+          `Transaction simulation failed: ${
+            logs?.length ? logs.join("\n") : error.message
+          }`,
+        );
+      }
+    } else {
+      if (!message.includes("already been processed")) {
+        throw error;
+      }
     }
   }
 
