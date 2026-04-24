@@ -25,10 +25,12 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 - `MAGICBLOCK_TEE_WS_URL`
 - `MAGICBLOCK_TEE_CHALLENGE_PATH`
 - `MAGICBLOCK_TEE_AUTH_PATH`
+- `AGENT_DESTINATION_PUBKEY`
 
 The sample is configured for devnet by default. The TEE auth endpoint paths are env-configurable placeholders until they are validated against a live MagicBlock integration. Public transfers do not require that auth path in this sample.
 
 The default local keypair path is `./keypairs/01.json`.
+The fixed browser stake destination defaults to `AhJJkA2WBFPKpRjL5JnHZiTkNYDRWhr13cpTRMHDzZNA` when `AGENT_DESTINATION_PUBKEY` is unset.
 
 Keep real keypairs out of git.
 
@@ -52,18 +54,22 @@ The service expects a Solana CLI-style keypair file:
 
 The app now exposes a browser UI at `/`.
 
-Phantom is the primary tested wallet via the Solana wallet adapter stack. The wallet UI is connected, but the remote-signing API routes are still added in the next steps.
+Phantom is the primary tested wallet via the Solana wallet adapter stack.
 
-The browser remote-signing flow is:
+The browser stake flow is:
 
 - connect Phantom
-- request a MagicBlock private-payment challenge when `privacy` is `private`
+- review the fixed configured destination shown in the form
+- review the fixed `private` privacy mode shown in the form
+- enter the amount to stake
+- request a MagicBlock private-payment challenge
 - let the wallet sign the challenge
 - let the server build the unsigned transaction
 - let the wallet sign the transaction
 - submit the signed transaction through Solana RPC
+- open the Solana Explorer transaction link shown after a successful submission
 
-The browser flow still uses MagicBlock private payments.
+The current browser UI always stakes privately to the configured agent destination. Destination and privacy are readonly in the form, memo entry is not part of this flow, and successful submissions show a `Stake transaction` Solana Explorer link.
 
 The preserved built-in-keypair test path is:
 
