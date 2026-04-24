@@ -2,14 +2,20 @@ export const runtime = "nodejs";
 
 import { loadConfig } from "@/src/server/config";
 import { jsonError, jsonOk } from "@/src/server/http";
-import { listStakers } from "@/src/server/stakers/list";
-import type { StakersResponse } from "@/src/server/types";
+import { getStakersSnapshot } from "@/src/server/stakers/snapshot";
+import type { StakersSnapshotResponse } from "@/src/server/types";
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
   try {
-    const stakers = listStakers(loadConfig());
-    return jsonOk<StakersResponse>({ ok: true, stakers });
+    const url = new URL(request.url);
+    const timestamp = url.searchParams.get("timestamp");
+    const snapshot = getStakersSnapshot(loadConfig(), timestamp);
+    return jsonOk<StakersSnapshotResponse>(snapshot);
   } catch (error) {
+    if (error instanceof RangeError) {
+      return jsonError(400, "Invalid timestamp", error.message);
+    }
+
     return jsonError(
       500,
       "Unable to load stakers",
