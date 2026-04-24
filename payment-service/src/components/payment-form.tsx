@@ -6,6 +6,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
+import { AppNav } from "@/src/components/app-nav";
 import { getClientConfig } from "@/src/lib/client-config";
 import { executePrivatePayment } from "@/src/lib/payment/private-payment/execute";
 import { executePublicPayment } from "@/src/lib/payment/public-payment/execute";
@@ -143,6 +144,7 @@ export function PaymentForm({ agentDestination }: PaymentFormProps) {
 
   return (
     <main className="page-shell">
+      <AppNav current="home" />
       <section className="panel">
         <p className="eyebrow">MagicBlock stake flow</p>
         <h1>Staked Agent</h1>

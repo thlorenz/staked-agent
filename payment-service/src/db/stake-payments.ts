@@ -1,5 +1,7 @@
 import type Database from "better-sqlite3";
 
+import type { StakerLeaderboardEntry } from "@/src/server/types";
+
 export type StakePaymentStatus = "confirmed";
 
 export type StakePaymentRecord = {
@@ -39,6 +41,13 @@ type StakePaymentRow = {
   status: StakePaymentStatus;
   created_at: string;
   updated_at: string;
+};
+
+type StakerLeaderboardRow = {
+  staker_pubkey: string;
+  total_amount: number;
+  stake_count: number;
+  first_stake_unix: number;
 };
 
 function mapStakePaymentRow(row: StakePaymentRow): StakePaymentRecord {
@@ -122,4 +131,36 @@ export function insertStakePayment(
   }
 
   return record;
+}
+
+export function listStakerLeaderboard(
+  db: Database.Database,
+): StakerLeaderboardEntry[] {
+  const rows = db
+    .prepare(
+      `
+      SELECT
+        staker_pubkey,
+        COALESCE(SUM(amount), 0) AS total_amount,
+        COUNT(*) AS stake_count,
+        COALESCE(
+          MIN(block_time),
+          MIN(CAST(strftime('%s', staked_at) AS INTEGER))
+        ) AS first_stake_unix
+      FROM stake_payments
+      GROUP BY staker_pubkey
+      ORDER BY
+        stake_count DESC,
+        first_stake_unix ASC,
+        staker_pubkey ASC
+      `,
+    )
+    .all() as StakerLeaderboardRow[];
+
+  return rows.map((row, index) => ({
+    displayName: `<anonymous ${index + 1}>`,
+    totalAmount: row.total_amount,
+    stakeCount: row.stake_count,
+    firstStakeUnixSeconds: row.first_stake_unix,
+  }));
 }

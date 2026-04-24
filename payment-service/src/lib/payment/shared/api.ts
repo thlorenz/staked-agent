@@ -1,7 +1,12 @@
 import { Buffer } from "buffer";
 
 import bs58 from "bs58";
-import { Connection, Transaction, VersionedTransaction } from "@solana/web3.js";
+import {
+  Connection,
+  SendTransactionError,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 
 import type {
   PublicStakeSubmitRequest,
@@ -260,8 +265,24 @@ export async function submitSignedTransaction(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (!message.includes("already been processed")) {
-      throw error;
+    if (error instanceof SendTransactionError) {
+      const logs = await error.getLogs(connection).catch(() => error.logs);
+      if (
+        message.includes("already been processed") ||
+        logs?.some((log) => log.includes("already been processed"))
+      ) {
+        // Treat duplicate preflight results as success and continue to confirmation.
+      } else {
+        throw new Error(
+          `Transaction simulation failed: ${
+            logs?.length ? logs.join("\n") : error.message
+          }`,
+        );
+      }
+    } else {
+      if (!message.includes("already been processed")) {
+        throw error;
+      }
     }
   }
 

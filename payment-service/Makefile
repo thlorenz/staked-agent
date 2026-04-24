@@ -12,7 +12,24 @@ SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
 VERIFY_TEE ?= false
 SQLITE_DB_PATH ?= ./src/db/staked-agent.sqlite
 
-.PHONY: run build health balance pay remote-build browser-pay
+.DEFAULT_GOAL := help
+
+.PHONY: help run init-stakers-db reset-stakers-db build health balance pay remote-build browser-pay
+
+help:
+	@printf 'Available tasks:\n'
+	@awk 'BEGIN { split("", tasks) } \
+		/^\.PHONY:/ { for (i = 2; i <= NF; i++) tasks[$$i] = 1 } \
+		END { for (task in tasks) print "  " task }' Makefile | sort
+
+run: init-stakers-db
+
+init-stakers-db:
+	SQLITE_DB_PATH=$(SQLITE_DB_PATH) node ./scripts/init-stakers-db.cjs
+
+reset-stakers-db:
+	rm -f "$(SQLITE_DB_PATH)" "$(SQLITE_DB_PATH)-wal" "$(SQLITE_DB_PATH)-shm"
+	$(MAKE) init-stakers-db SQLITE_DB_PATH=$(SQLITE_DB_PATH)
 
 run:
 	PORT=$(PORT) \

@@ -113,6 +113,18 @@ export type RecordedStakePayment = {
   status: "confirmed";
 };
 
+export type StakerLeaderboardEntry = {
+  displayName: string;
+  totalAmount: number;
+  stakeCount: number;
+  firstStakeUnixSeconds: number;
+};
+
+export type StakersResponse = {
+  ok: true;
+  stakers: StakerLeaderboardEntry[];
+};
+
 export type RemoteSubmitResponse = {
   ok: true;
   signature: string;

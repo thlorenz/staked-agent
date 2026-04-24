@@ -161,6 +161,19 @@ The main difference is who signs:
 - `/api/pay` uses the built-in keypair on the server
 - the browser flow uses the connected wallet in Phantom
 
+## Stakers leaderboard
+
+- `GET /api/stakers` returns anonymous staker rows only and never exposes real pubkeys.
+- `/stakers` renders the leaderboard page.
+- Each row shows the total recorded amount and the stake count for that staker.
+- Stake count is derived from the number of persisted verified public stake rows for that staker.
+
+## Database init
+
+- `make init-stakers-db` creates the SQLite database file if needed and applies the stakers table schema.
+- `make reset-stakers-db` deletes the SQLite database file and recreates an empty schema.
+- `make run` now runs that initialization step before starting the Next.js server.
+
 ## Known limitations
 
 - The sample is custodial.

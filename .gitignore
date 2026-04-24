@@ -1,1 +1,4 @@
 prompts/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
