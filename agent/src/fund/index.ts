@@ -2,12 +2,14 @@ import { Wallet as AnchorWallet } from "@coral-xyz/anchor";
 import { Percentage } from "@orca-so/common-sdk";
 import {
   ORCA_WHIRLPOOL_PROGRAM_ID,
+  PDAUtil,
   UseFallbackTickArray,
   buildWhirlpoolClient,
   WhirlpoolContext,
   swapQuoteByOutputToken,
 } from "@orca-so/whirlpools-sdk";
 import BN from "bn.js";
+import { PublicKey } from "@solana/web3.js";
 
 import { loadAgentConfig } from "../config";
 import {
@@ -20,12 +22,25 @@ import { ensureAssociatedTokenAccount, transferSplTokens } from "../shared/spl";
 import { USDC_DECIMALS } from "../shared/tokens";
 import type { FundRequest, FundResult } from "./types";
 
-const DEVNET_USDC_MINT = "BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k";
-const DEVNET_SOL_USDC_WHIRLPOOL =
-  "3KBZiL2g8C7tiJ32hTv5v3KM7aK9htpqTw4cTXz1HvPt";
+const SOL_USDC_TICK_SPACING = 64;
+const SOL_MINT = "So11111111111111111111111111111111111111112";
 
 function bigintFromBn(value: BN): bigint {
   return BigInt(value.toString(10));
+}
+
+function getFundingWhirlpoolAddress(
+  whirlpoolsConfig: string,
+  solMint: string,
+  usdcMint: string,
+): PublicKey {
+  return PDAUtil.getWhirlpool(
+    ORCA_WHIRLPOOL_PROGRAM_ID,
+    parsePublicKey(whirlpoolsConfig, "Whirlpools config"),
+    parsePublicKey(solMint, "SOL mint"),
+    parsePublicKey(usdcMint, "USDC mint"),
+    SOL_USDC_TICK_SPACING,
+  ).publicKey;
 }
 
 function formatFundingError(prefix: string, error: unknown): never {
@@ -38,16 +53,14 @@ export async function executeFunding(
   request: FundRequest,
 ): Promise<FundResult> {
   const config = loadAgentConfig();
-  if (config.cluster !== "devnet") {
-    throw new Error("Only devnet is supported.");
-  }
 
   const connection = createSolanaConnection(config.solanaRpcUrl);
   const { operatorSigner, agentRecipient } = loadFundingWallets(config);
-  const usdcMint = parsePublicKey(DEVNET_USDC_MINT, "USDC mint");
-  const whirlpoolAddress = parsePublicKey(
-    DEVNET_SOL_USDC_WHIRLPOOL,
-    "Orca devnet SOL/USDC whirlpool",
+  const usdcMint = parsePublicKey(config.usdcMint, "USDC mint");
+  const whirlpoolAddress = getFundingWhirlpoolAddress(
+    config.whirlpoolsConfig,
+    SOL_MINT,
+    config.usdcMint,
   );
 
   const operatorUsdcAta = await ensureAssociatedTokenAccount(

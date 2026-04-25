@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 export type AgentConfig = {
-  cluster: "devnet";
+  cluster: "devnet" | "mainnet";
   solanaRpcUrl: string;
   agentKeypairPath: string;
   operatorSolanaCliConfigPath: string;
@@ -9,6 +9,7 @@ export type AgentConfig = {
   agentFundingKeypairPath: string;
   fundingMultiplier: number;
   usdcMint: string;
+  whirlpoolsConfig: string;
   solMint: string;
   coinGeckoBaseUrl: string;
   coinGeckoDemoApiKey?: string;
@@ -18,6 +19,12 @@ export type AgentConfig = {
   maxPriorityFeeLamports: number;
   minSolFeeReserveLamports: bigint;
 };
+
+const DEVNET_USDC_MINT = "BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k";
+const MAINNET_USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+const DEVNET_WHIRLPOOLS_CONFIG = "FcrweFY1G9HJAHG5inkGB6pKg1HZ6x9UC2WioAfWrGkR";
+const MAINNET_WHIRLPOOLS_CONFIG =
+  "2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -51,8 +58,8 @@ function parsePositiveInteger(
 
 export function loadAgentConfig(): AgentConfig {
   const cluster = process.env.CLUSTER ?? "devnet";
-  if (cluster !== "devnet") {
-    throw new Error("Only devnet is supported.");
+  if (cluster !== "devnet" && cluster !== "mainnet") {
+    throw new Error("CLUSTER must be devnet or mainnet.");
   }
 
   const agentKeypairPath =
@@ -75,7 +82,13 @@ export function loadAgentConfig(): AgentConfig {
       "AGENT_FUNDING_MULTIPLIER",
     ),
     usdcMint:
-      process.env.USDC_MINT ?? "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW",
+      process.env.USDC_MINT ??
+      (cluster === "devnet" ? DEVNET_USDC_MINT : MAINNET_USDC_MINT),
+    whirlpoolsConfig:
+      process.env.WHIRLPOOLS_CONFIG ??
+      (cluster === "devnet"
+        ? DEVNET_WHIRLPOOLS_CONFIG
+        : MAINNET_WHIRLPOOLS_CONFIG),
     solMint: "So11111111111111111111111111111111111111112",
     coinGeckoBaseUrl:
       process.env.COIN_GECKO_BASE_URL ?? "https://api.coingecko.com/api/v3",

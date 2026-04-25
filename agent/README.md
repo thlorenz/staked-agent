@@ -14,12 +14,13 @@ cd agent && yarn install
 
 - `SOLANA_RPC_URL`
 - `AGENT_KEYPAIR_PATH` with fallback to `SENDER_KEYPAIR_PATH`
-- `USDC_MINT`
-- `CLUSTER=devnet`
+- `CLUSTER=devnet` or `CLUSTER=mainnet`
+- `USDC_MINT` optional override for the cluster default mint
 - `SOLANA_CLI_CONFIG_PATH` with fallback to `~/.config/solana/cli/config.yml`
 - `OPERATOR_KEYPAIR_PATH` optional explicit override for the funding operator wallet
 - `AGENT_FUNDING_KEYPAIR_PATH` with fallback to `../keypairs/agent.json`
 - `AGENT_FUNDING_MULTIPLIER` with fallback to `2`
+- `WHIRLPOOLS_CONFIG` optional override for the cluster default Whirlpool config
 
 The default keypair path is `../keypairs/01.json` from within the `agent/` package directory.
 
@@ -61,19 +62,18 @@ yarn trade -- +0.001
 
 ## funding flow
 
-- `yarn fund -- 0.01` parses a requested USDC amount, buys `2x` that amount of devnet USDC on Orca, and transfers the requested amount into `./keypairs/agent.json`
+- `yarn fund -- 0.01` parses a requested USDC amount, buys `2x` that amount on Orca, and transfers the requested amount into `./keypairs/agent.json`
 - the command uses the operator wallet from the local Solana CLI config unless `OPERATOR_KEYPAIR_PATH` is set
-- it creates the operator and agent USDC ATAs on devnet if they do not exist
-- it uses the operator wallet's SOL to buy devnet USDC before the transfer step
+- it creates the operator and agent USDC ATAs before the buy/transfer flow
+- it uses the operator wallet's SOL to buy USDC before the transfer step
 - it transfers exactly the requested USDC amount into the agent wallet
 
 ## funding notes
 
 - the local Solana CLI config must exist at `SOLANA_CLI_CONFIG_PATH` and include `keypair_path`
 - the default destination keypair path is `../keypairs/agent.json` from within `agent/`
-- the funding mint is Orca's devnet `devUSDC` mint `BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k`
-- the buy step uses the Orca devnet SOL/USDC Whirlpool `3KBZiL2g8C7tiJ32hTv5v3KM7aK9htpqTw4cTXz1HvPt`
-- funding remains devnet-only in this version
+- the funding mint defaults to Orca's devnet `devUSDC` mint on devnet and the mainnet USDC mint on mainnet
+- the pool selection is cluster-aware: both devnet and mainnet derive the SOL/USDC Whirlpool from Orca config for the active cluster
 
 ## limitations
 
