@@ -1,3 +1,14 @@
+import { Wallet as AnchorWallet } from "@coral-xyz/anchor";
+import { Percentage } from "@orca-so/common-sdk";
+import {
+  ORCA_WHIRLPOOL_PROGRAM_ID,
+  UseFallbackTickArray,
+  buildWhirlpoolClient,
+  WhirlpoolContext,
+  swapQuoteByOutputToken,
+} from "@orca-so/whirlpools-sdk";
+import BN from "bn.js";
+
 import { loadAgentConfig } from "../config";
 import {
   buildExplorerTxUrl,
@@ -6,8 +17,22 @@ import {
 } from "../shared";
 import { loadFundingWallets } from "../shared/solana-cli";
 import { ensureAssociatedTokenAccount, transferSplTokens } from "../shared/spl";
-import { executePreparedSwap, prepareSwap } from "../trade";
+import { USDC_DECIMALS } from "../shared/tokens";
 import type { FundRequest, FundResult } from "./types";
+
+const DEVNET_USDC_MINT = "BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k";
+const DEVNET_SOL_USDC_WHIRLPOOL =
+  "3KBZiL2g8C7tiJ32hTv5v3KM7aK9htpqTw4cTXz1HvPt";
+
+function bigintFromBn(value: BN): bigint {
+  return BigInt(value.toString(10));
+}
+
+function formatFundingError(prefix: string, error: unknown): never {
+  throw new Error(
+    `${prefix}: ${error instanceof Error ? error.message : String(error)}`,
+  );
+}
 
 export async function executeFunding(
   request: FundRequest,
@@ -19,7 +44,11 @@ export async function executeFunding(
 
   const connection = createSolanaConnection(config.solanaRpcUrl);
   const { operatorSigner, agentRecipient } = loadFundingWallets(config);
-  const usdcMint = parsePublicKey(config.usdcMint, "USDC mint");
+  const usdcMint = parsePublicKey(DEVNET_USDC_MINT, "USDC mint");
+  const whirlpoolAddress = parsePublicKey(
+    DEVNET_SOL_USDC_WHIRLPOOL,
+    "Orca devnet SOL/USDC whirlpool",
+  );
 
   const operatorUsdcAta = await ensureAssociatedTokenAccount(
     connection,
@@ -36,33 +65,45 @@ export async function executeFunding(
 
   const purchaseTargetAtomicAmount =
     request.requestedUsdcAtomicAmount * BigInt(config.fundingMultiplier);
-  const preparedSwap = await prepareSwap({
-    signer: operatorSigner,
-    inputMint: config.solMint,
-    outputMint: config.usdcMint,
-    amountAtomic: purchaseTargetAtomicAmount,
-    swapMode: "ExactOut",
-    slippageBps: request.slippageBps,
-  });
+
+  const orcaWallet = new AnchorWallet(operatorSigner);
+  const orcaContext = WhirlpoolContext.from(
+    connection,
+    orcaWallet,
+    ORCA_WHIRLPOOL_PROGRAM_ID,
+  );
+  const whirlpoolClient = buildWhirlpoolClient(orcaContext);
+
+  const whirlpool = await whirlpoolClient.getPool(whirlpoolAddress);
+  const purchaseQuote = await swapQuoteByOutputToken(
+    whirlpool,
+    usdcMint,
+    new BN(purchaseTargetAtomicAmount.toString()),
+    Percentage.fromFraction(request.slippageBps, 10_000),
+    ORCA_WHIRLPOOL_PROGRAM_ID,
+    orcaContext.fetcher,
+    undefined,
+    UseFallbackTickArray.Never,
+  );
 
   const balanceLamports = await connection.getBalance(operatorSigner.publicKey);
   if (
     BigInt(balanceLamports) <
-    preparedSwap.inputAmountAtomic + config.minSolFeeReserveLamports
+    bigintFromBn(purchaseQuote.estimatedAmountIn) +
+      config.minSolFeeReserveLamports
   ) {
-    throw new Error("Insufficient SOL for swap plus fee reserve.");
+    throw new Error("Insufficient SOL for purchase plus fee reserve.");
   }
 
   let purchaseSignature: string;
   try {
-    const executedSwap = await executePreparedSwap(preparedSwap);
-    purchaseSignature = executedSwap.signature;
-  } catch (error) {
-    throw new Error(
-      `Failed swap transaction: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+    const purchaseTx = await whirlpool.swap(
+      purchaseQuote,
+      operatorSigner.publicKey,
     );
+    purchaseSignature = await purchaseTx.buildAndExecute();
+  } catch (error) {
+    formatFundingError("Failed swap transaction", error);
   }
 
   let transferSignature: string;
@@ -75,19 +116,16 @@ export async function executeFunding(
       agentUsdcAta,
       usdcMint,
       request.requestedUsdcAtomicAmount,
-      6,
+      USDC_DECIMALS,
     );
   } catch (error) {
-    throw new Error(
-      `Failed SPL token transfer: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
+    formatFundingError("Failed SPL token transfer", error);
   }
 
   return {
     requestedUsdcAtomicAmount: request.requestedUsdcAtomicAmount,
-    purchasedUsdcAtomicAmount: preparedSwap.outputAmountAtomic,
+    purchasedUsdcAtomicAmount: bigintFromBn(purchaseQuote.estimatedAmountOut),
+    transferredUsdcAtomicAmount: request.requestedUsdcAtomicAmount,
     sourceWallet: operatorSigner.publicKey.toBase58(),
     destinationWallet: agentRecipient.publicKey.toBase58(),
     operatorUsdcAta: operatorUsdcAta.toBase58(),

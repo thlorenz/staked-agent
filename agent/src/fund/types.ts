@@ -6,6 +6,7 @@ export type FundRequest = {
 export type FundResult = {
   requestedUsdcAtomicAmount: bigint;
   purchasedUsdcAtomicAmount: bigint;
+  transferredUsdcAtomicAmount: bigint;
   sourceWallet: string;
   destinationWallet: string;
   operatorUsdcAta: string;

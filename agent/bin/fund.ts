@@ -28,7 +28,7 @@ function printFundingSummary(
   );
   console.log(
     `Transferred USDC: ${formatUsdcAtomicAmount(
-      result.requestedUsdcAtomicAmount,
+      result.transferredUsdcAtomicAmount,
     )}`,
   );
   console.log(`Purchase signature: ${result.purchaseSignature}`);
