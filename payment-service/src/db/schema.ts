@@ -23,3 +23,21 @@ export function ensureStakePaymentsSchema(db: Database.Database): void {
       ON stake_payments (block_time);
   `);
 }
+
+export function ensureTradesSchema(db: Database.Database): void {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS trades (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      traded_at TEXT NOT NULL,
+      type TEXT NOT NULL CHECK (type IN ('buy','sell')),
+      amount_sol_atomic INTEGER NOT NULL,
+      price_usdc REAL NOT NULL,
+      signature TEXT NOT NULL UNIQUE,
+      cluster TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_trades_traded_at
+      ON trades (traded_at);
+  `);
+}
