@@ -1,19 +1,19 @@
 import { loadAgentConfig } from "../src/config";
 import { executeTrade } from "../src/trade";
-import { parseSignedUsdcCliAmount } from "../src/shared";
+import { parseSignedSolCliAmount } from "../src/shared";
 import type { TradeRequest } from "../src/trade/types";
 
 export function parseTradeArgs(argv: string[]): TradeRequest {
   if (argv.length !== 1) {
-    throw new Error("Usage: esr bin/trade.ts <signed-usdc-amount>");
+    throw new Error("Usage: esr bin/trade.ts <signed-sol-amount>");
   }
 
   const config = loadAgentConfig();
-  const { sign, atomicAmount } = parseSignedUsdcCliAmount(argv[0]);
+  const { sign, atomicAmount } = parseSignedSolCliAmount(argv[0]);
 
   return {
     direction: sign === 1 ? "buy-sol-with-usdc" : "sell-sol-for-usdc",
-    usdcAtomicAmount: atomicAmount,
+    solAtomicAmount: atomicAmount,
     slippageBps: config.slippageBps,
   };
 }
