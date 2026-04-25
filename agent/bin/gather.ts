@@ -1,8 +1,31 @@
-async function main(): Promise<void> {
-  throw new Error("gather CLI is not implemented yet.");
+import { getHistoricalSolPrices } from "../src/gather";
+import { renderHistoricalPricesMarkdown } from "../src/gather/markdown";
+
+export function parseGatherArgs(argv: string[]): number {
+  if (argv.length !== 1) {
+    throw new Error("Usage: esr bin/gather.ts <lookback-seconds>");
+  }
+
+  const [lookbackSecondsText] = argv;
+  if (!/^\d+$/.test(lookbackSecondsText)) {
+    throw new Error("Usage: esr bin/gather.ts <lookback-seconds>");
+  }
+
+  const lookbackSeconds = Number(lookbackSecondsText);
+  if (!Number.isSafeInteger(lookbackSeconds) || lookbackSeconds <= 0) {
+    throw new Error("Usage: esr bin/gather.ts <lookback-seconds>");
+  }
+
+  return lookbackSeconds;
 }
 
-void main().catch((error) => {
+async function main(argv: string[]): Promise<void> {
+  const lookbackSeconds = parseGatherArgs(argv);
+  const series = await getHistoricalSolPrices(lookbackSeconds);
+  console.log(renderHistoricalPricesMarkdown(series));
+}
+
+void main(process.argv.slice(2)).catch((error) => {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });
