@@ -22,6 +22,7 @@ export type AgentConfig = {
   strategySellPercent: number;
   strategyName: string;
   strategyLookbackSecondsOverride: number | null;
+  strategyMaThreshold: number;
   tradesDbPath: string;
 };
 
@@ -144,7 +145,7 @@ export function loadAgentConfig(): AgentConfig {
     ),
     strategyBuyPercent: parsePercent(
       process.env.AGENT_STRATEGY_BUY_PERCENT,
-      20,
+      10,
       "AGENT_STRATEGY_BUY_PERCENT",
     ),
     strategySellPercent: parsePercent(
@@ -158,11 +159,20 @@ export function loadAgentConfig(): AgentConfig {
       if (value === undefined || value === "") {
         return null;
       }
-      return parsePositiveInteger(
-        value,
-        0,
-        "AGENT_STRATEGY_LOOKBACK_SECONDS",
-      );
+      return parsePositiveInteger(value, 0, "AGENT_STRATEGY_LOOKBACK_SECONDS");
+    })(),
+    strategyMaThreshold: (() => {
+      const value = process.env.AGENT_STRATEGY_MA_THRESHOLD_PERCENT;
+      if (value === undefined || value === "") {
+        return 0.01; // Default to 1%
+      }
+      const parsed = parseFloat(value);
+      if (isNaN(parsed) || parsed < 0) {
+        throw new Error(
+          "AGENT_STRATEGY_MA_THRESHOLD_PERCENT must be a non-negative number.",
+        );
+      }
+      return parsed / 100;
     })(),
     tradesDbPath:
       process.env.AGENT_TRADES_DB_PATH ??

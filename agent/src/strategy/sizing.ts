@@ -1,26 +1,25 @@
 const LAMPORTS_PER_SOL = 1_000_000_000n;
 
 export type BuySizingInput = {
-  solHeldLamports: bigint;
+  usdcAvailableAtomic: bigint;
   priceUsdcPerSol: number;
   buyPercent: number; // (0, 100]
 };
 
 /**
  * Returns the SOL amount (in lamports) to buy. The buy size is
- * `buyPercent` of the USDC value of currently held SOL, converted
+ * `buyPercent` of the available USDC balance, converted
  * back to lamports using the latest price.
  */
 export function computeBuySolAmount(input: BuySizingInput): bigint {
   if (input.priceUsdcPerSol <= 0) {
     return 0n;
   }
-  if (input.solHeldLamports <= 0n) {
+  if (input.usdcAvailableAtomic <= 0n) {
     return 0n;
   }
-  const heldSol = Number(input.solHeldLamports) / Number(LAMPORTS_PER_SOL);
-  const usdcValueOfHeld = heldSol * input.priceUsdcPerSol;
-  const usdcToSpend = usdcValueOfHeld * (input.buyPercent / 100);
+  const usdcToSpend =
+    (Number(input.usdcAvailableAtomic) / 1_000_000) * (input.buyPercent / 100);
   const solToBuy = usdcToSpend / input.priceUsdcPerSol;
   const lamports = BigInt(Math.floor(solToBuy * Number(LAMPORTS_PER_SOL)));
   return lamports > 0n ? lamports : 0n;

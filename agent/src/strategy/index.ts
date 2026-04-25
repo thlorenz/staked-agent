@@ -117,7 +117,7 @@ async function tick(
   const solAtomicAmount =
     mode === "buy"
       ? computeBuySolAmount({
-          solHeldLamports: balances.solLamports,
+          usdcAvailableAtomic: balances.usdcAtomic,
           priceUsdcPerSol: priceUsdc,
           buyPercent: config.strategyBuyPercent,
         })
