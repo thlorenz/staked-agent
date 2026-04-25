@@ -49,12 +49,19 @@ esr bin/fund.ts 0.01
 
 - `+0.001` means buy exactly `0.001 SOL` by selling `USDC`
 - `-0.002` means sell exactly `0.002 SOL` for `USDC`
-- the command supports **mainnet trading only** via live Jupiter quotes
-- **devnet limitation**: Jupiter API returns `TOKEN_NOT_TRADABLE` for devnet because devnet has no real liquidity in trading pools. The devnet USDC mint `BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k` exists but is not tradable via Jupiter's liquidity aggregation.
+- the command supports both **devnet** (via Whirlpool) and **mainnet** (via Jupiter) trading
 
 ## examples
 
-Mainnet mode (required for live trading):
+Devnet mode (via Whirlpool):
+
+```sh
+cd agent
+CLUSTER=devnet SOLANA_RPC_URL=https://api.devnet.solana.com yarn trade -- +0.0001
+CLUSTER=devnet SOLANA_RPC_URL=https://api.devnet.solana.com yarn trade -- -0.0001
+```
+
+Mainnet mode (via Jupiter):
 
 ```sh
 cd agent
