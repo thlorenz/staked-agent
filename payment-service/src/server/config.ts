@@ -91,7 +91,7 @@ export function loadConfig(): AppConfig {
     usdcMint: getRequiredEnv("USDC_MINT"),
     validator: process.env.VALIDATOR?.trim() || undefined,
     senderKeypairPath:
-      process.env.SENDER_KEYPAIR_PATH?.trim() || "./keypairs/01.json",
+      process.env.SENDER_KEYPAIR_PATH?.trim() || "../keypairs/01.json",
     verifyTee: parseVerifyTee(process.env.VERIFY_TEE?.trim()),
     nextPublicSolanaRpcUrl:
       process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim() || solanaRpcUrl,

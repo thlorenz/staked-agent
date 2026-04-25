@@ -5,3 +5,5 @@ prompts/
 agent/node_modules/
 agent/coverage/
 agent/*.tsbuildinfo
+keypairs/*.json
+!keypairs/.gitkeep

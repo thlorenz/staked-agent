@@ -30,7 +30,7 @@ These environment variables control Solana RPC and MagicBlock endpoints:
 
 The sample is configured for devnet by default. The TEE auth flow uses MagicBlock's current `/auth/challenge` and `/auth/login` endpoints. Public transfers do not require that auth path in this sample.
 
-The default local keypair path is `./keypairs/01.json`.
+The default local keypair path is `../keypairs/01.json`.
 The fixed browser stake destination defaults to `AhJJkA2WBFPKpRjL5JnHZiTkNYDRWhr13cpTRMHDzZNA` when `AGENT_DESTINATION_PUBKEY` is unset.
 
 Keep real keypairs out of git.
@@ -105,7 +105,7 @@ For `POST /api/pay`, the sample defaults:
 - `cluster` to `CLUSTER`
 - `privacy` to `public`
 
-The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The server signs with the local JSON keypair at `./keypairs/01.json` for this preserved custodial test route.
+The default cluster is `devnet`, and Solana RPC plus MagicBlock endpoints can be overridden via env vars. The server signs with the local JSON keypair at `../keypairs/01.json` for this preserved custodial test route.
 
 Example request:
 
@@ -123,8 +123,7 @@ curl -X POST http://localhost:3000/api/pay \
 
 ```sh
 cp .env.local.example .env.local
-mkdir -p keypairs
-# place a real Solana CLI-style keypair at ./keypairs/01.json
+# place a real Solana CLI-style keypair at ../keypairs/01.json
 yarn install
 yarn dev
 curl http://localhost:3000/api/health

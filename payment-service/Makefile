@@ -8,7 +8,7 @@ MAGICBLOCK_TEE_AUTH_PATH ?= /auth/login
 CLUSTER ?= devnet
 USDC_MINT ?= 6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW
 VALIDATOR ?= MUS3hc9TCw4cGC12vHNoYcCGzJG1txjgQLZWVoeNHNd
-SENDER_KEYPAIR_PATH ?= ./keypairs/01.json
+SENDER_KEYPAIR_PATH ?= ../keypairs/01.json
 VERIFY_TEE ?= false
 SQLITE_DB_PATH ?= ./src/db/staked-agent.sqlite
 

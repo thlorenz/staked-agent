@@ -17,6 +17,8 @@ cd agent && yarn install
 - `USDC_MINT`
 - `CLUSTER=devnet`
 
+The default keypair path is `../keypairs/01.json` from within the `agent/` package directory.
+
 Optional environment variables:
 
 - `COINGECKO_DEMO_API_KEY`

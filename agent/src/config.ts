@@ -54,7 +54,7 @@ export function loadAgentConfig(): AgentConfig {
   const agentKeypairPath =
     process.env.AGENT_KEYPAIR_PATH ??
     process.env.SENDER_KEYPAIR_PATH ??
-    "./keypairs/01.json";
+    "../keypairs/01.json";
 
   return {
     cluster,
