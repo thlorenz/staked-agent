@@ -77,9 +77,6 @@ export async function executeTrade(
   request: TradeRequest,
 ): Promise<ExecutedTrade> {
   const config = loadAgentConfig();
-  if (config.cluster !== "devnet") {
-    throw new Error("Only devnet is supported.");
-  }
 
   const connection = createSolanaConnection(config.solanaRpcUrl);
   const signer = loadKeypairFromFile(config.agentKeypairPath);
