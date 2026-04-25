@@ -1,6 +1,6 @@
 import { loadAgentConfig } from "../src/config";
 import { executeTrade } from "../src/trade";
-import { parseSignedSolCliAmount } from "../src/shared";
+import { parseSignedSolCliAmount, formatAtomicToDecimal } from "../src/shared";
 import type { TradeRequest } from "../src/trade/types";
 
 export function parseTradeArgs(argv: string[]): TradeRequest {
@@ -21,6 +21,10 @@ export function parseTradeArgs(argv: string[]): TradeRequest {
 async function main(argv: string[]): Promise<void> {
   const request = parseTradeArgs(argv);
   const trade = await executeTrade(request);
+  console.log(`Direction: ${trade.direction}`);
+  console.log(`Requested SOL: ${formatAtomicToDecimal(request.solAtomicAmount, 9)}`);
+  console.log(`Input amount (atomic): ${trade.inputAmountAtomic}`);
+  console.log(`Output amount (atomic): ${trade.outputAmountAtomic}`);
   console.log(`Signature: ${trade.signature}`);
   console.log(`Explorer: ${trade.explorerUrl}`);
 }
