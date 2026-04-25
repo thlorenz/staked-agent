@@ -89,16 +89,16 @@ export async function executeTrade(
           signer,
           inputMint: config.usdcMint,
           outputMint: config.solMint,
-          amountAtomic: request.usdcAtomicAmount,
-          swapMode: "ExactIn",
+          amountAtomic: request.solAtomicAmount,
+          swapMode: "ExactOut",
           slippageBps: request.slippageBps,
         }
       : {
           signer,
           inputMint: config.solMint,
           outputMint: config.usdcMint,
-          amountAtomic: request.usdcAtomicAmount,
-          swapMode: "ExactOut",
+          amountAtomic: request.solAtomicAmount,
+          swapMode: "ExactIn",
           slippageBps: request.slippageBps,
         };
 
@@ -116,7 +116,7 @@ export async function executeTrade(
       return total + BigInt(amount);
     }, 0n);
 
-    if (availableUsdc < request.usdcAtomicAmount) {
+    if (availableUsdc < preparedSwap.inputAmountAtomic) {
       throw new Error("Insufficient USDC balance.");
     }
   } else {
