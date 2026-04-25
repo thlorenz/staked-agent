@@ -4,7 +4,6 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import type { AgentConfig } from "../config";
-import type { TradesDb } from "../../lib/trades-db";
 
 export type ExecutorResult = {
   success: boolean;
@@ -17,18 +16,15 @@ export class TradeExecutor {
   private connection: Connection;
   private keypair: Keypair;
   private config: AgentConfig;
-  private tradesDb: TradesDb;
 
   constructor(
     connection: Connection,
     keypair: Keypair,
     config: AgentConfig,
-    tradesDb: TradesDb,
   ) {
     this.connection = connection;
     this.keypair = keypair;
     this.config = config;
-    this.tradesDb = tradesDb;
   }
 
   async executeBuy(amountUsdcAtomic: number): Promise<ExecutorResult> {
