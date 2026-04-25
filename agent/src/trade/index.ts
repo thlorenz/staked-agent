@@ -114,15 +114,18 @@ export async function executeTrade(
     }, 0n);
 
     if (availableUsdc < preparedSwap.inputAmountAtomic) {
-      throw new Error("Insufficient USDC balance.");
+      throw new Error(
+        `Insufficient USDC balance: quote requires ${preparedSwap.inputAmountAtomic} USDC.`,
+      );
     }
   } else {
     const balanceLamports = await connection.getBalance(signer.publicKey);
-    if (
-      BigInt(balanceLamports) <
-      preparedSwap.inputAmountAtomic + config.minSolFeeReserveLamports
-    ) {
-      throw new Error("Insufficient SOL balance.");
+    const requiredSol =
+      request.solAtomicAmount + config.minSolFeeReserveLamports;
+    if (BigInt(balanceLamports) < requiredSol) {
+      throw new Error(
+        `Insufficient native SOL balance: need ${request.solAtomicAmount} SOL for trade plus ${config.minSolFeeReserveLamports} lamports for reserves.`,
+      );
     }
   }
 
