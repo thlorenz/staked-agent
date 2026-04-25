@@ -7,7 +7,8 @@
     "lint": "yarn run check && eslint . --fix",
     "gather": "esr bin/gather.ts",
     "trade": "esr bin/trade.ts",
-    "fund": "esr bin/fund.ts"
+    "fund": "esr bin/fund.ts",
+    "strategy": "esr bin/strategy.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
