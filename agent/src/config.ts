@@ -17,6 +17,12 @@ export type AgentConfig = {
   slippageBps: number;
   maxPriorityFeeLamports: number;
   minSolFeeReserveLamports: bigint;
+  strategyTickSeconds: number;
+  strategyBuyPercent: number;
+  strategySellPercent: number;
+  strategyName: string;
+  strategyLookbackSecondsOverride: number | null;
+  tradesDbPath: string;
 };
 
 const DEVNET_USDC_MINT = "BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k";
@@ -50,6 +56,27 @@ function parsePositiveInteger(
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
     throw new Error(`${fieldName} must be a positive integer.`);
+  }
+
+  return parsed;
+}
+
+function parsePercent(
+  value: string | undefined,
+  fallback: number,
+  fieldName: string,
+): number {
+  if (value === undefined || value === "") {
+    return fallback;
+  }
+
+  if (!/^\d+$/.test(value)) {
+    throw new Error(`${fieldName} must be a positive integer.`);
+  }
+
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > 100) {
+    throw new Error(`${fieldName} must be between 0 and 100.`);
   }
 
   return parsed;
@@ -110,5 +137,35 @@ export function loadAgentConfig(): AgentConfig {
         "AGENT_MIN_SOL_FEE_RESERVE_LAMPORTS",
       ),
     ),
+    strategyTickSeconds: parsePositiveInteger(
+      process.env.AGENT_STRATEGY_TICK_SECONDS,
+      60,
+      "AGENT_STRATEGY_TICK_SECONDS",
+    ),
+    strategyBuyPercent: parsePercent(
+      process.env.AGENT_STRATEGY_BUY_PERCENT,
+      20,
+      "AGENT_STRATEGY_BUY_PERCENT",
+    ),
+    strategySellPercent: parsePercent(
+      process.env.AGENT_STRATEGY_SELL_PERCENT,
+      90,
+      "AGENT_STRATEGY_SELL_PERCENT",
+    ),
+    strategyName: process.env.AGENT_STRATEGY ?? "moving-average",
+    strategyLookbackSecondsOverride: (() => {
+      const value = process.env.AGENT_STRATEGY_LOOKBACK_SECONDS;
+      if (value === undefined || value === "") {
+        return null;
+      }
+      return parsePositiveInteger(
+        value,
+        0,
+        "AGENT_STRATEGY_LOOKBACK_SECONDS",
+      );
+    })(),
+    tradesDbPath:
+      process.env.AGENT_TRADES_DB_PATH ??
+      "../payment-service/src/db/staked-agent.sqlite",
   };
 }
