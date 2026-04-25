@@ -1,5 +1,5 @@
 import { getHistoricalSolPrices } from "../src/gather";
-import { renderHistoricalPricesMarkdown } from "../src/gather/markdown";
+import { renderHistoricalPricesTerminal } from "../src/gather/terminal";
 
 export function parseGatherArgs(argv: string[]): number {
   if (argv.length !== 1) {
@@ -22,7 +22,7 @@ export function parseGatherArgs(argv: string[]): number {
 async function main(argv: string[]): Promise<void> {
   const lookbackSeconds = parseGatherArgs(argv);
   const series = await getHistoricalSolPrices(lookbackSeconds);
-  console.log(renderHistoricalPricesMarkdown(series));
+  console.log(renderHistoricalPricesTerminal(series));
 }
 
 void main(process.argv.slice(2)).catch((error) => {
