@@ -2,3 +2,8 @@ prompts/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+agent/node_modules/
+agent/coverage/
+agent/*.tsbuildinfo
+keypairs/*.json
+!keypairs/.gitkeep

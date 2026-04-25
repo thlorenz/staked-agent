@@ -4,5 +4,3 @@ dist/
 tsconfig.tsbuildinfo
 .env
 .env.local
-keypairs/*.json
-!keypairs/.gitkeep
