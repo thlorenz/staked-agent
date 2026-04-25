@@ -64,3 +64,7 @@ export function parseSignedUsdcCliAmount(value: string): {
 
   return { sign, atomicAmount };
 }
+
+export function parseUnsignedUsdcCliAmount(value: string): bigint {
+  return parseDecimalToAtomic(value, 6, "fund amount");
+}

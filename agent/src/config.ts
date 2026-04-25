@@ -4,6 +4,10 @@ export type AgentConfig = {
   cluster: "devnet";
   solanaRpcUrl: string;
   agentKeypairPath: string;
+  operatorSolanaCliConfigPath: string;
+  operatorKeypairPathOverride?: string;
+  agentFundingKeypairPath: string;
+  fundingMultiplier: number;
   usdcMint: string;
   solMint: string;
   coinGeckoBaseUrl: string;
@@ -60,6 +64,16 @@ export function loadAgentConfig(): AgentConfig {
     cluster,
     solanaRpcUrl: getRequiredEnv("SOLANA_RPC_URL"),
     agentKeypairPath,
+    operatorSolanaCliConfigPath:
+      process.env.SOLANA_CLI_CONFIG_PATH ?? "~/.config/solana/cli/config.yml",
+    operatorKeypairPathOverride: process.env.OPERATOR_KEYPAIR_PATH,
+    agentFundingKeypairPath:
+      process.env.AGENT_FUNDING_KEYPAIR_PATH ?? "../keypairs/agent.json",
+    fundingMultiplier: parsePositiveInteger(
+      process.env.AGENT_FUNDING_MULTIPLIER,
+      2,
+      "AGENT_FUNDING_MULTIPLIER",
+    ),
     usdcMint:
       process.env.USDC_MINT ?? "6aMfKfekyzLpsF74Bgg7pZxNUM2iwcyXkg9cRjQ9XJYW",
     solMint: "So11111111111111111111111111111111111111112",

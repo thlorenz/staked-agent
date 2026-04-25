@@ -9,9 +9,69 @@ import {
 import { buildJupiterSwapTransaction, getJupiterQuote } from "./jupiter";
 import type {
   ExecutedTrade,
-  JupiterQuoteResponse,
+  ExecutedSwap,
+  PreparedSwap,
+  SwapRequest,
   TradeRequest,
 } from "./types";
+
+function parseQuoteAmount(value: string, fieldName: string): bigint {
+  if (!/^\d+$/.test(value)) {
+    throw new Error(`Invalid ${fieldName}.`);
+  }
+
+  return BigInt(value);
+}
+
+export async function prepareSwap(request: SwapRequest): Promise<PreparedSwap> {
+  const config = loadAgentConfig();
+  const rawQuote = await getJupiterQuote(config, request);
+
+  return {
+    request,
+    inputAmountAtomic: parseQuoteAmount(
+      rawQuote.inAmount,
+      "Jupiter quote input amount",
+    ),
+    outputAmountAtomic: parseQuoteAmount(
+      rawQuote.outAmount,
+      "Jupiter quote output amount",
+    ),
+    rawQuote,
+  };
+}
+
+export async function executePreparedSwap(
+  prepared: PreparedSwap,
+): Promise<ExecutedSwap> {
+  const config = loadAgentConfig();
+  const connection = createSolanaConnection(config.solanaRpcUrl);
+  const swapTransactionBase64 = await buildJupiterSwapTransaction(
+    config,
+    prepared.request.signer.publicKey.toBase58(),
+    prepared.rawQuote,
+  );
+  const transaction = deserializeVersionedTransaction(swapTransactionBase64);
+  transaction.sign([prepared.request.signer]);
+
+  const signature = await connection.sendRawTransaction(
+    transaction.serialize(),
+  );
+  const confirmation = await connection.confirmTransaction(
+    signature,
+    "confirmed",
+  );
+  if (confirmation.value.err !== null) {
+    throw new Error("Swap transaction failed.");
+  }
+
+  return {
+    signature,
+    explorerUrl: buildExplorerTxUrl(signature),
+    inputAmountAtomic: prepared.inputAmountAtomic,
+    outputAmountAtomic: prepared.outputAmountAtomic,
+  };
+}
 
 export async function executeTrade(
   request: TradeRequest,
@@ -23,7 +83,26 @@ export async function executeTrade(
 
   const connection = createSolanaConnection(config.solanaRpcUrl);
   const signer = loadKeypairFromFile(config.agentKeypairPath);
-  const quote = await getJupiterQuote(config, request);
+  const swapRequest: SwapRequest =
+    request.direction === "buy-sol-with-usdc"
+      ? {
+          signer,
+          inputMint: config.usdcMint,
+          outputMint: config.solMint,
+          amountAtomic: request.usdcAtomicAmount,
+          swapMode: "ExactIn",
+          slippageBps: request.slippageBps,
+        }
+      : {
+          signer,
+          inputMint: config.solMint,
+          outputMint: config.usdcMint,
+          amountAtomic: request.usdcAtomicAmount,
+          swapMode: "ExactOut",
+          slippageBps: request.slippageBps,
+        };
+
+  const preparedSwap = await prepareSwap(swapRequest);
 
   if (request.direction === "buy-sol-with-usdc") {
     const usdcMint = parsePublicKey(config.usdcMint, "USDC mint");
@@ -44,36 +123,19 @@ export async function executeTrade(
     const balanceLamports = await connection.getBalance(signer.publicKey);
     if (
       BigInt(balanceLamports) <
-      quote.inputAmountAtomic + config.minSolFeeReserveLamports
+      preparedSwap.inputAmountAtomic + config.minSolFeeReserveLamports
     ) {
       throw new Error("Insufficient SOL balance.");
     }
   }
 
-  const swapTransactionBase64 = await buildJupiterSwapTransaction(
-    config,
-    signer.publicKey.toBase58(),
-    quote.rawQuote as JupiterQuoteResponse,
-  );
-  const transaction = deserializeVersionedTransaction(swapTransactionBase64);
-  transaction.sign([signer]);
-
-  const signature = await connection.sendRawTransaction(
-    transaction.serialize(),
-  );
-  const confirmation = await connection.confirmTransaction(
-    signature,
-    "confirmed",
-  );
-  if (confirmation.value.err !== null) {
-    throw new Error("Swap transaction failed.");
-  }
+  const executedSwap = await executePreparedSwap(preparedSwap);
 
   return {
     direction: request.direction,
-    signature,
-    explorerUrl: buildExplorerTxUrl(signature),
-    inputAmountAtomic: quote.inputAmountAtomic,
-    outputAmountAtomic: quote.outputAmountAtomic,
+    signature: executedSwap.signature,
+    explorerUrl: executedSwap.explorerUrl,
+    inputAmountAtomic: executedSwap.inputAmountAtomic,
+    outputAmountAtomic: executedSwap.outputAmountAtomic,
   };
 }

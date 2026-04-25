@@ -1,25 +1,18 @@
 import type { AgentConfig } from "../config";
-import type { JupiterQuoteResponse, TradeQuote, TradeRequest } from "./types";
-
-function parseQuoteAmount(value: string, fieldName: string): bigint {
-  if (!/^\d+$/.test(value)) {
-    throw new Error(`Invalid ${fieldName}.`);
-  }
-
-  return BigInt(value);
-}
+import type { JupiterQuoteResponse, SwapRequest } from "./types";
 
 export async function getJupiterQuote(
   config: AgentConfig,
-  request: TradeRequest,
-): Promise<TradeQuote> {
+  request: Pick<
+    SwapRequest,
+    "inputMint" | "outputMint" | "amountAtomic" | "swapMode" | "slippageBps"
+  >,
+): Promise<JupiterQuoteResponse> {
   const url = new URL(`${config.jupiterBaseUrl}/quote`);
-  const isBuy = request.direction === "buy-sol-with-usdc";
-
-  url.searchParams.set("inputMint", isBuy ? config.usdcMint : config.solMint);
-  url.searchParams.set("outputMint", isBuy ? config.solMint : config.usdcMint);
-  url.searchParams.set("amount", request.usdcAtomicAmount.toString());
-  url.searchParams.set("swapMode", isBuy ? "ExactIn" : "ExactOut");
+  url.searchParams.set("inputMint", request.inputMint);
+  url.searchParams.set("outputMint", request.outputMint);
+  url.searchParams.set("amount", request.amountAtomic.toString());
+  url.searchParams.set("swapMode", request.swapMode);
   url.searchParams.set("slippageBps", request.slippageBps.toString());
 
   const headers: Record<string, string> = {};
@@ -34,22 +27,7 @@ export async function getJupiterQuote(
     );
   }
 
-  const rawQuote = (await response.json()) as JupiterQuoteResponse;
-
-  return {
-    direction: request.direction,
-    inputMint: rawQuote.inputMint,
-    outputMint: rawQuote.outputMint,
-    inputAmountAtomic: parseQuoteAmount(
-      rawQuote.inAmount,
-      "Jupiter quote input amount",
-    ),
-    outputAmountAtomic: parseQuoteAmount(
-      rawQuote.outAmount,
-      "Jupiter quote output amount",
-    ),
-    rawQuote,
-  };
+  return (await response.json()) as JupiterQuoteResponse;
 }
 
 export async function buildJupiterSwapTransaction(
