@@ -67,7 +67,7 @@ export async function executePreparedSwap(
 
   return {
     signature,
-    explorerUrl: buildExplorerTxUrl(signature),
+    explorerUrl: buildExplorerTxUrl(signature, config.cluster),
     inputAmountAtomic: prepared.inputAmountAtomic,
     outputAmountAtomic: prepared.outputAmountAtomic,
   };
