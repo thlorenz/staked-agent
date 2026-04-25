@@ -54,6 +54,7 @@ export async function executeFunding(
   request: FundRequest,
 ): Promise<FundResult> {
   const config = loadAgentConfig();
+  const cluster = config.cluster;
 
   const connection = createSolanaConnection(config.solanaRpcUrl);
   const { operatorSigner } = loadFundingWallets(config);
@@ -147,7 +148,7 @@ export async function executeFunding(
     agentUsdcAta: agentUsdcAta.toBase58(),
     purchaseSignature,
     transferSignature,
-    purchaseExplorerUrl: buildExplorerTxUrl(purchaseSignature),
-    transferExplorerUrl: buildExplorerTxUrl(transferSignature),
+    purchaseExplorerUrl: buildExplorerTxUrl(purchaseSignature, cluster),
+    transferExplorerUrl: buildExplorerTxUrl(transferSignature, cluster),
   };
 }
