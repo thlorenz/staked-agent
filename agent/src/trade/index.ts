@@ -1,108 +1,39 @@
 import { loadAgentConfig } from "../config";
 import {
-  buildExplorerTxUrl,
   createSolanaConnection,
-  deserializeVersionedTransaction,
   loadKeypairFromFile,
   parsePublicKey,
 } from "../shared";
-import { buildJupiterSwapTransaction, getJupiterQuote } from "./jupiter";
-import type {
-  ExecutedTrade,
-  ExecutedSwap,
-  PreparedSwap,
-  SwapRequest,
-  TradeRequest,
-} from "./types";
-
-function parseQuoteAmount(value: string, fieldName: string): bigint {
-  if (!/^\d+$/.test(value)) {
-    throw new Error(`Invalid ${fieldName}.`);
-  }
-
-  return BigInt(value);
-}
-
-export async function prepareSwap(request: SwapRequest): Promise<PreparedSwap> {
-  const config = loadAgentConfig();
-  const rawQuote = await getJupiterQuote(config, request);
-
-  return {
-    request,
-    inputAmountAtomic: parseQuoteAmount(
-      rawQuote.inAmount,
-      "Jupiter quote input amount",
-    ),
-    outputAmountAtomic: parseQuoteAmount(
-      rawQuote.outAmount,
-      "Jupiter quote output amount",
-    ),
-    rawQuote,
-  };
-}
-
-export async function executePreparedSwap(
-  prepared: PreparedSwap,
-): Promise<ExecutedSwap> {
-  const config = loadAgentConfig();
-  const connection = createSolanaConnection(config.solanaRpcUrl);
-  const swapTransactionBase64 = await buildJupiterSwapTransaction(
-    config,
-    prepared.request.signer.publicKey.toBase58(),
-    prepared.rawQuote,
-  );
-  const transaction = deserializeVersionedTransaction(swapTransactionBase64);
-  transaction.sign([prepared.request.signer]);
-
-  const signature = await connection.sendRawTransaction(
-    transaction.serialize(),
-  );
-  const confirmation = await connection.confirmTransaction(
-    signature,
-    "confirmed",
-  );
-  if (confirmation.value.err !== null) {
-    throw new Error("Swap transaction failed.");
-  }
-
-  return {
-    signature,
-    explorerUrl: buildExplorerTxUrl(signature),
-    inputAmountAtomic: prepared.inputAmountAtomic,
-    outputAmountAtomic: prepared.outputAmountAtomic,
-  };
-}
+import { getSwapProvider } from "./providers";
+import type { SwapQuoteRequest } from "./providers";
+import type { ExecutedTrade, TradeRequest } from "./types";
 
 export async function executeTrade(
   request: TradeRequest,
 ): Promise<ExecutedTrade> {
   const config = loadAgentConfig();
-  if (config.cluster !== "devnet") {
-    throw new Error("Only devnet is supported.");
-  }
-
   const connection = createSolanaConnection(config.solanaRpcUrl);
   const signer = loadKeypairFromFile(config.agentKeypairPath);
-  const swapRequest: SwapRequest =
+  const provider = getSwapProvider(config);
+
+  const quoteRequest: SwapQuoteRequest =
     request.direction === "buy-sol-with-usdc"
       ? {
-          signer,
           inputMint: config.usdcMint,
           outputMint: config.solMint,
-          amountAtomic: request.usdcAtomicAmount,
-          swapMode: "ExactIn",
+          amountAtomic: request.solAtomicAmount,
+          swapMode: "ExactOut",
           slippageBps: request.slippageBps,
         }
       : {
-          signer,
           inputMint: config.solMint,
           outputMint: config.usdcMint,
-          amountAtomic: request.usdcAtomicAmount,
-          swapMode: "ExactOut",
+          amountAtomic: request.solAtomicAmount,
+          swapMode: "ExactIn",
           slippageBps: request.slippageBps,
         };
 
-  const preparedSwap = await prepareSwap(swapRequest);
+  const quote = await provider.getQuote(quoteRequest);
 
   if (request.direction === "buy-sol-with-usdc") {
     const usdcMint = parsePublicKey(config.usdcMint, "USDC mint");
@@ -116,20 +47,23 @@ export async function executeTrade(
       return total + BigInt(amount);
     }, 0n);
 
-    if (availableUsdc < request.usdcAtomicAmount) {
-      throw new Error("Insufficient USDC balance.");
+    if (availableUsdc < quote.inputAmountAtomic) {
+      throw new Error(
+        `Insufficient USDC balance: quote requires ${quote.inputAmountAtomic} USDC.`,
+      );
     }
   } else {
     const balanceLamports = await connection.getBalance(signer.publicKey);
-    if (
-      BigInt(balanceLamports) <
-      preparedSwap.inputAmountAtomic + config.minSolFeeReserveLamports
-    ) {
-      throw new Error("Insufficient SOL balance.");
+    const requiredSol =
+      request.solAtomicAmount + config.minSolFeeReserveLamports;
+    if (BigInt(balanceLamports) < requiredSol) {
+      throw new Error(
+        `Insufficient native SOL balance: need ${request.solAtomicAmount} SOL for trade plus ${config.minSolFeeReserveLamports} lamports for reserves.`,
+      );
     }
   }
 
-  const executedSwap = await executePreparedSwap(preparedSwap);
+  const executedSwap = await provider.executeSwap({ signer, quote });
 
   return {
     direction: request.direction,

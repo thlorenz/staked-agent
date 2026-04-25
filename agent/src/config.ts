@@ -6,7 +6,6 @@ export type AgentConfig = {
   agentKeypairPath: string;
   operatorSolanaCliConfigPath: string;
   operatorKeypairPathOverride?: string;
-  agentFundingKeypairPath: string;
   fundingMultiplier: number;
   usdcMint: string;
   whirlpoolsConfig: string;
@@ -74,8 +73,6 @@ export function loadAgentConfig(): AgentConfig {
     operatorSolanaCliConfigPath:
       process.env.SOLANA_CLI_CONFIG_PATH ?? "~/.config/solana/cli/config.yml",
     operatorKeypairPathOverride: process.env.OPERATOR_KEYPAIR_PATH,
-    agentFundingKeypairPath:
-      process.env.AGENT_FUNDING_KEYPAIR_PATH ?? "../keypairs/agent.json",
     fundingMultiplier: parsePositiveInteger(
       process.env.AGENT_FUNDING_MULTIPLIER,
       2,

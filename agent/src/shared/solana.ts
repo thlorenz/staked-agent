@@ -80,6 +80,12 @@ export function deserializeVersionedTransaction(
   }
 }
 
-export function buildExplorerTxUrl(signature: string): string {
-  return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+export function buildExplorerTxUrl(
+  signature: string,
+  cluster: "devnet" | "mainnet",
+): string {
+  if (cluster === "devnet") {
+    return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+  }
+  return `https://explorer.solana.com/tx/${signature}`;
 }

@@ -46,7 +46,7 @@ export function formatAtomicToDecimal(
   return `${whole.toString()}.${fractionString}`;
 }
 
-export function parseSignedUsdcCliAmount(value: string): {
+export function parseSignedSolCliAmount(value: string): {
   sign: 1 | -1;
   atomicAmount: bigint;
 } {
@@ -56,7 +56,7 @@ export function parseSignedUsdcCliAmount(value: string): {
 
   const sign = value.startsWith("-") ? -1 : 1;
   const absoluteValue = value.slice(1);
-  const atomicAmount = parseDecimalToAtomic(absoluteValue, 6, "trade amount");
+  const atomicAmount = parseDecimalToAtomic(absoluteValue, 9, "trade amount");
 
   if (atomicAmount <= 0n) {
     throw new Error("Trade amount must be greater than zero.");

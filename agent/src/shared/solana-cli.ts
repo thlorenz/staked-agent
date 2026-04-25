@@ -72,8 +72,6 @@ export function loadSolanaCliConfig(filePath: string): SolanaCliConfig {
 export function loadFundingWallets(config: AgentConfig): {
   operatorSigner: Keypair;
   operatorKeypairPath: string;
-  agentRecipient: Keypair;
-  agentFundingKeypairPath: string;
 } {
   const operatorKeypairPath =
     config.operatorKeypairPathOverride ??
@@ -91,35 +89,8 @@ export function loadFundingWallets(config: AgentConfig): {
     );
   }
 
-  const defaultAgentFundingKeypairPath = "../keypairs/agent.json";
-  const resolvedAgentFundingKeypairPath = path.resolve(
-    config.agentFundingKeypairPath,
-  );
-  if (
-    config.agentFundingKeypairPath === defaultAgentFundingKeypairPath &&
-    resolvedAgentFundingKeypairPath !==
-      path.resolve(defaultAgentFundingKeypairPath)
-  ) {
-    throw new Error(
-      `Invalid or disallowed destination path ${resolvedAgentFundingKeypairPath}.`,
-    );
-  }
-
-  let agentRecipient: Keypair;
-  try {
-    agentRecipient = loadKeypairFromFile(resolvedAgentFundingKeypairPath);
-  } catch (error) {
-    throw new Error(
-      `Unable to read funding destination keypair at ${resolvedAgentFundingKeypairPath}: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-  }
-
   return {
     operatorSigner,
     operatorKeypairPath: resolvedOperatorKeypairPath,
-    agentRecipient,
-    agentFundingKeypairPath: resolvedAgentFundingKeypairPath,
   };
 }
