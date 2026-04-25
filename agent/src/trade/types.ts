@@ -12,8 +12,29 @@ export type TradeRequest =
       slippageBps: number;
     };
 
+export type TradeQuote = {
+  direction: TradeDirection;
+  inputMint: string;
+  outputMint: string;
+  inputAmountAtomic: bigint;
+  outputAmountAtomic: bigint;
+  rawQuote: unknown;
+};
+
 export type ExecutedTrade = {
   direction: TradeDirection;
   signature: string;
   explorerUrl: string;
+  inputAmountAtomic: bigint;
+  outputAmountAtomic: bigint;
+};
+
+export type JupiterQuoteResponse = {
+  inputMint: string;
+  inAmount: string;
+  outputMint: string;
+  outAmount: string;
+  swapMode: "ExactIn" | "ExactOut";
+  otherAmountThreshold: string;
+  routePlan: unknown[];
 };
