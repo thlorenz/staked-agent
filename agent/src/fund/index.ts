@@ -16,6 +16,7 @@ import {
   buildExplorerTxUrl,
   createSolanaConnection,
   parsePublicKey,
+  loadKeypairFromFile,
 } from "../shared";
 import { loadFundingWallets } from "../shared/solana-cli";
 import { ensureAssociatedTokenAccount, transferSplTokens } from "../shared/spl";
@@ -55,7 +56,8 @@ export async function executeFunding(
   const config = loadAgentConfig();
 
   const connection = createSolanaConnection(config.solanaRpcUrl);
-  const { operatorSigner, agentRecipient } = loadFundingWallets(config);
+  const { operatorSigner } = loadFundingWallets(config);
+  const agentRecipient = loadKeypairFromFile(config.agentKeypairPath);
   const usdcMint = parsePublicKey(config.usdcMint, "USDC mint");
   const whirlpoolAddress = getFundingWhirlpoolAddress(
     config.whirlpoolsConfig,
