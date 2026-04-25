@@ -22,8 +22,15 @@ export async function getJupiterQuote(
 
   const response = await fetch(url.toString(), { headers });
   if (!response.ok) {
+    const responseBody = await response.text();
     throw new Error(
-      `Jupiter quote request failed with status ${response.status}.`,
+      `Jupiter quote request failed with status ${response.status}.\n` +
+      `Request URL: ${url.toString()}\n` +
+      `inputMint: ${request.inputMint}\n` +
+      `outputMint: ${request.outputMint}\n` +
+      `amountAtomic: ${request.amountAtomic}\n` +
+      `swapMode: ${request.swapMode}\n` +
+      `Response body: ${responseBody}`,
     );
   }
 
@@ -58,8 +65,10 @@ export async function buildJupiterSwapTransaction(
   });
 
   if (!response.ok) {
+    const responseBody = await response.text();
     throw new Error(
-      `Jupiter swap request failed with status ${response.status}.`,
+      `Jupiter swap request failed with status ${response.status}.\n` +
+      `Response body: ${responseBody}`,
     );
   }
 
