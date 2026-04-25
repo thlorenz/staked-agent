@@ -1,7 +1,7 @@
 import bs58 from "bs58";
 
 import type { AppConfig } from "@/src/server/config";
-import { ensureStakePaymentsSchema } from "@/src/db/schema";
+import { ensureStakePaymentsSchema, ensureTradesSchema } from "@/src/db/schema";
 import { getDatabase } from "@/src/db/client";
 import {
   insertStakePayment,
@@ -92,6 +92,7 @@ export async function submitSignedTransactionBase64(
 
   const db = getDatabase(config.sqliteDbPath);
   ensureStakePaymentsSchema(db);
+  ensureTradesSchema(db);
   const verified = await verifyConfirmedPublicStakePayment({
     connection,
     config,

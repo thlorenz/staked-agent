@@ -1,6 +1,6 @@
 import type { AppConfig } from "@/src/server/config";
 import { getDatabase } from "@/src/db/client";
-import { ensureStakePaymentsSchema } from "@/src/db/schema";
+import { ensureStakePaymentsSchema, ensureTradesSchema } from "@/src/db/schema";
 import {
   getStakeTimeline,
   listStakerTotalsAtTimestamp,
@@ -51,6 +51,7 @@ export function getStakersSnapshot(
 ): StakersSnapshotResponse {
   const db = getDatabase(config.sqliteDbPath);
   ensureStakePaymentsSchema(db);
+  ensureTradesSchema(db);
 
   const timeline = getStakeTimeline(db);
   const fallbackTimestamp =
