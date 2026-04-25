@@ -1,0 +1,23 @@
+{
+  "name": "agent",
+  "private": true,
+  "scripts": {
+    "fmt": "prettier --write .",
+    "check": "tsc --noEmit",
+    "gather": "esr bin/gather.ts",
+    "trade": "esr bin/trade.ts"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "bufferutil": "^4.0.1",
+    "esbuild": "^0.28.0",
+    "esbuild-runner": "^2.2.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "utf-8-validate": "^5.0.2"
+  }
+}
