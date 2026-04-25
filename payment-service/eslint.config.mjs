@@ -2,6 +2,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { FlatCompat } from "@eslint/eslintrc";
+import { baseIgnores } from "../eslint.config.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,12 +13,9 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  baseIgnores,
   {
     ignores: [
-      ".next/**",
-      "out/**",
-      "build/**",
-      "dist/**",
       "next-env.d.ts",
       "scripts/*.cjs",
     ],

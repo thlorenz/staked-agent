@@ -5,9 +5,7 @@ import {
   parsePublicKey,
 } from "../shared";
 import { getSwapProvider } from "./providers";
-import type {
-  SwapQuoteRequest,
-} from "./providers";
+import type { SwapQuoteRequest } from "./providers";
 import type { ExecutedTrade, TradeRequest } from "./types";
 
 export async function executeTrade(

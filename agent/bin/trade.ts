@@ -22,7 +22,9 @@ async function main(argv: string[]): Promise<void> {
   const request = parseTradeArgs(argv);
   const trade = await executeTrade(request);
   console.log(`Direction: ${trade.direction}`);
-  console.log(`Requested SOL: ${formatAtomicToDecimal(request.solAtomicAmount, 9)}`);
+  console.log(
+    `Requested SOL: ${formatAtomicToDecimal(request.solAtomicAmount, 9)}`,
+  );
   console.log(`Input amount (atomic): ${trade.inputAmountAtomic}`);
   console.log(`Output amount (atomic): ${trade.outputAmountAtomic}`);
   console.log(`Signature: ${trade.signature}`);

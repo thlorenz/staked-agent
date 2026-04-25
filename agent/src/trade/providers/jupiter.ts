@@ -4,10 +4,7 @@ import {
   createSolanaConnection,
   deserializeVersionedTransaction,
 } from "../../shared";
-import {
-  buildJupiterSwapTransaction,
-  getJupiterQuote,
-} from "../jupiter";
+import { buildJupiterSwapTransaction, getJupiterQuote } from "../jupiter";
 import type { JupiterQuoteResponse } from "../types";
 import type {
   ExecutedSwap,
@@ -45,9 +42,7 @@ export class JupiterSwapProvider implements SwapProvider {
     };
   }
 
-  async executeSwap(
-    request: SwapExecutionRequest,
-  ): Promise<ExecutedSwap> {
+  async executeSwap(request: SwapExecutionRequest): Promise<ExecutedSwap> {
     const connection = createSolanaConnection(this.config.solanaRpcUrl);
     const rawQuote = request.quote.rawQuote as JupiterQuoteResponse;
     const swapTransactionBase64 = await buildJupiterSwapTransaction(
@@ -55,9 +50,7 @@ export class JupiterSwapProvider implements SwapProvider {
       request.signer.publicKey.toBase58(),
       rawQuote,
     );
-    const transaction = deserializeVersionedTransaction(
-      swapTransactionBase64,
-    );
+    const transaction = deserializeVersionedTransaction(swapTransactionBase64);
     transaction.sign([request.signer]);
 
     const signature = await connection.sendRawTransaction(

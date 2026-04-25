@@ -31,6 +31,14 @@ export type ExecutedTrade = {
 
 export type SwapMode = "ExactIn" | "ExactOut";
 
+export type SwapRequest = {
+  inputMint: string;
+  outputMint: string;
+  amountAtomic: bigint;
+  swapMode: SwapMode;
+  slippageBps: number;
+};
+
 export type JupiterQuoteResponse = {
   inputMint: string;
   inAmount: string;
