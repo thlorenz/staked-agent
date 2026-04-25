@@ -2,7 +2,7 @@
 
 ## purpose
 
-`agent` is a standalone TypeScript CLI package for gathering historical SOL price data, executing devnet USDC/native-SOL trades, and funding the agent wallet on devnet.
+`agent` is a standalone TypeScript CLI package for gathering historical SOL price data, executing USDC/native-SOL trades, and funding the agent wallet. It supports both devnet and mainnet clusters.
 
 ## installation
 
@@ -45,20 +45,30 @@ esr bin/trade.ts -0.002
 esr bin/fund.ts 0.01
 ```
 
+## trade semantics
+
+- `+0.001` means buy exactly `0.001 SOL` by selling `USDC`
+- `-0.002` means sell exactly `0.002 SOL` for `USDC`
+- the command supports `devnet` and `mainnet` according to `CLUSTER` and `SOLANA_RPC_URL`
+
 ## examples
+
+Devnet mode (default):
 
 ```sh
 cd agent
 yarn install
-yarn gather -- 3600
-yarn trade -- +0.001
+CLUSTER=devnet SOLANA_RPC_URL=https://api.devnet.solana.com yarn trade -- +0.0001
+CLUSTER=devnet SOLANA_RPC_URL=https://api.devnet.solana.com yarn trade -- -0.0001
 ```
 
-## trade semantics
+Mainnet mode:
 
-- `+0.001` means spend exactly `0.001 USDC` to buy native `SOL`
-- `-0.002` means sell enough native `SOL` to receive `0.002 USDC`
-- all trading is devnet-only in this version
+```sh
+cd agent
+CLUSTER=mainnet SOLANA_RPC_URL=https://api.mainnet-beta.solana.com yarn trade -- +0.0001
+CLUSTER=mainnet SOLANA_RPC_URL=https://api.mainnet-beta.solana.com yarn trade -- -0.0001
+```
 
 ## funding flow
 
